@@ -526,12 +526,12 @@ func _send_ollama_request(message: String, context: String, request_id: String =
 	# Send message using dedicated handler
 	ollama_handler.send_chat_message(message, not context.is_empty())
 
-func _on_ollama_response(response: String):
+func _on_ollama_response(response: String, request_id: String = ""):
 	"""Handle response from dedicated Ollama handler"""
 	print("Ollama response received: ", response.substr(0, 100) + "...")
 	response_received.emit(response)
 
-func _on_ollama_error(error: String):
+func _on_ollama_error(error: String, request_id: String = ""):
 	"""Handle error from dedicated Ollama handler"""
 	print("Ollama error: ", error)
 	error_occurred.emit(error)
