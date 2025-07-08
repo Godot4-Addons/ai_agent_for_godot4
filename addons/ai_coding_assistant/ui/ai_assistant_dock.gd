@@ -80,10 +80,16 @@ func _ready():
 	call_deferred("_connect_viewport_signals")
 
 	# Create and add API manager as a child node
-	api_manager = preload("res://addons/ai_coding_assistant/ai/ai_api_manager.gd").new()
-	add_child(api_manager)
-	api_manager.response_received.connect(_on_response_received)
-	api_manager.error_occurred.connect(_on_error_occurred)
+	var APIManagerClass = load("res://addons/ai_coding_assistant/ai/ai_api_manager.gd")
+	if APIManagerClass:
+		api_manager = APIManagerClass.new()
+		add_child(api_manager)
+		if api_manager.has_signal("response_received"):
+			api_manager.response_received.connect(_on_response_received)
+		if api_manager.has_signal("error_occurred"):
+			api_manager.error_occurred.connect(_on_error_occurred)
+	else:
+		print("Warning: Could not load AI API Manager")
 
 	# Initialize editor integration if EditorInterface is available
 	if plugin_editor_interface:
@@ -859,7 +865,8 @@ func _on_toggle_code_line_numbers():
 func _on_provider_changed(index: int):
 	var providers = ["gemini", "huggingface", "cohere", "openai", "anthropic", "groq", "ollama"]
 	if index < providers.size():
-		api_manager.set_provider(providers[index])
+		if api_manager and api_manager.has_method("set_provider"):
+			api_manager.set_provider(providers[index])
 		_update_provider_info(providers[index])
 		_update_model_dropdown()
 
@@ -908,9 +915,15 @@ func _update_model_dropdown():
 		return
 
 	model_option.clear()
-	var models = api_manager.get_available_models()
-	for model in models:
-		model_option.add_item(model)
+	if api_manager and api_manager.has_method("get_available_models"):
+		var models = api_manager.get_available_models()
+		for model in models:
+			model_option.add_item(model)
+	else:
+		# Add default models if API manager not available
+		model_option.add_item("llama3.2")
+		model_option.add_item("qwen2.5-coder")
+		var models = ["llama3.2", "qwen2.5-coder"]
 
 	if models.size() > 0:
 		model_option.selected = 0

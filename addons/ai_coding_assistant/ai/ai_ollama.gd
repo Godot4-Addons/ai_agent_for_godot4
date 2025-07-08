@@ -301,10 +301,6 @@ func set_streaming_enabled(enabled: bool):
 	"""Enable or disable streaming"""
 	stream_enabled = enabled
 
-func get_available_models() -> Array:
-	"""Get list of available models"""
-	return available_models
-
 func set_preferred_model(model_name: String):
 	"""Set preferred model with availability check"""
 	if _is_model_available(model_name):
@@ -471,8 +467,8 @@ func delete_model(model_name: String) -> void:
 	print("Deleting Ollama model: ", model_name)
 	model_request.request(url, headers, HTTPClient.METHOD_DELETE, json_body)
 
-func get_model_info(model_name: String) -> void:
-	"""Get detailed information about a model"""
+func get_detailed_model_info(model_name: String) -> void:
+	"""Get detailed information about a model from API"""
 	var url = base_url + "/api/show"
 	var headers = ["Content-Type: application/json"]
 
