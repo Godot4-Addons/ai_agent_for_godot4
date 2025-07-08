@@ -76,17 +76,6 @@ Your support helps maintain and improve the **World's First Autonomous AI Coding
 
 ## 📊 **Transparency & Impact**
 
-### **How Donations Are Used**
-- **60%** - Direct development (AI API costs, infrastructure)
-- **25%** - Community resources (documentation, tutorials)
-- **15%** - Future research and advanced features
-
-### **Development Milestones**
-- **$500** - Enhanced AI model testing and optimization
-- **$1,000** - Advanced codebase analysis features
-- **$2,500** - Multi-language support development
-- **$5,000** - Enterprise features and plugin marketplace
-
 ## 🏆 **Supporter Recognition**
 
 ### **Supporter Tiers**

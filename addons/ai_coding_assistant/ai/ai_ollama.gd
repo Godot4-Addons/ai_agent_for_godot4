@@ -5,20 +5,38 @@ class_name AIOllama
 # Dedicated Ollama API handler with 2025 latest features
 # Supports local models, streaming, embeddings, and advanced features
 
-signal response_received(response: String)
-signal stream_chunk_received(chunk: String)
-signal error_occurred(error: String)
+signal response_received(response: String, request_id: String)
+signal stream_chunk_received(chunk: String, request_id: String)
+signal streaming_chunk_received(chunk: String, request_id: String)  # Alias for compatibility
+signal error_occurred(error: String, request_id: String)
 signal model_loaded(model_name: String)
 signal model_list_updated(models: Array)
+signal model_download_progress(model: String, progress: float)
+signal connection_status_changed(connected: bool)
 
-# Configuration
+# Enhanced Configuration
 var base_url: String = "http://localhost:11434"
 var current_model: String = "llama3.2"
-var stream_enabled: bool = false
+var stream_enabled: bool = true  # Enable streaming by default
 var temperature: float = 0.7
-var max_tokens: int = 2048
-var context_window: int = 4096
+var max_tokens: int = 4096  # Increased default
+var context_window: int = 8192  # Increased context window
 var keep_alive: String = "5m"
+
+# Enhanced features
+var auto_retry: bool = true
+var max_retries: int = 3
+var connection_timeout: float = 30.0
+var chunk_timeout: float = 5.0
+var auto_model_download: bool = false
+var preferred_models: Array[String] = ["qwen2.5-coder", "llama3.2", "codellama:7b"]
+
+# Request tracking
+var active_requests: Dictionary = {}
+var request_queue: Array = []
+var is_connected: bool = false
+var last_health_check: float = 0.0
+var health_check_interval: float = 30.0
 
 # HTTP requests
 var http_request: HTTPRequest
@@ -246,12 +264,112 @@ func clear_conversation():
 	conversation_history.clear()
 	print("Ollama conversation history cleared")
 
-func send_chat_message(message: String, use_context: bool = true) -> void:
-	"""Send chat message with 2025 Ollama API features"""
+# Enhanced helper functions
+func _generate_request_id() -> String:
+	"""Generate unique request ID"""
+	return "ollama_" + str(Time.get_unix_time_from_system()) + "_" + str(randi() % 10000)
+
+func _is_model_available(model_name: String) -> bool:
+	"""Check if model is available locally"""
+	for model in available_models:
+		if model.get("name", "") == model_name:
+			return true
+	return false
+
+func _download_model(model_name: String) -> bool:
+	"""Download model if auto-download is enabled"""
+	print("Downloading model: ", model_name)
+	var url = base_url + "/api/pull"
+	var headers = ["Content-Type: application/json"]
+
+	var body = {
+		"name": model_name,
+		"stream": true
+	}
+
+	var json_body = JSON.stringify(body)
+	model_request.request(url, headers, HTTPClient.METHOD_POST, json_body)
+
+	# Wait for download to complete (simplified)
+	await get_tree().create_timer(5.0).timeout
+	return true
+
+func get_connection_status() -> bool:
+	"""Get current connection status"""
+	return is_connected
+
+func set_streaming_enabled(enabled: bool):
+	"""Enable or disable streaming"""
+	stream_enabled = enabled
+
+func get_available_models() -> Array:
+	"""Get list of available models"""
+	return available_models
+
+func set_preferred_model(model_name: String):
+	"""Set preferred model with availability check"""
+	if _is_model_available(model_name):
+		current_model = model_name
+		print("Model set to: ", model_name)
+	else:
+		print("Model not available: ", model_name)
+		if auto_model_download:
+			_download_model(model_name)
+
+func get_model_info(model_name: String) -> Dictionary:
+	"""Get detailed information about a model"""
+	for model in available_models:
+		if model.get("name", "") == model_name:
+			return model
+	return {}
+
+func estimate_context_usage() -> Dictionary:
+	"""Estimate current context usage"""
+	var total_tokens = 0
+	for msg in conversation_history:
+		total_tokens += _estimate_tokens(msg.get("content", ""))
+
+	return {
+		"used_tokens": total_tokens,
+		"max_tokens": context_window,
+		"usage_percent": float(total_tokens) / context_window * 100.0,
+		"messages_count": conversation_history.size()
+	}
+
+func _estimate_tokens(text: String) -> int:
+	"""Rough token estimation"""
+	return max(1, text.length() / 4)
+
+func send_chat_message(message: String, use_context: bool = true, request_id: String = "") -> String:
+	"""Enhanced chat message with request tracking and better error handling"""
+	var actual_request_id = request_id if not request_id.is_empty() else _generate_request_id()
+
+	# Check connection first
+	if not is_connected:
+		await check_ollama_status()
+		if not is_connected:
+			error_occurred.emit("Ollama is not available", actual_request_id)
+			return actual_request_id
+
+	# Check if model is available
+	if not _is_model_available(current_model):
+		if auto_model_download:
+			await _download_model(current_model)
+		else:
+			error_occurred.emit("Model not available: " + current_model, actual_request_id)
+			return actual_request_id
+
 	var url = base_url + "/api/chat"
 	var headers = ["Content-Type: application/json"]
-	
-	# Build messages array
+
+	# Track request
+	active_requests[actual_request_id] = {
+		"start_time": Time.get_unix_time_from_system(),
+		"message": message,
+		"use_context": use_context
+	}
+
+	# Build enhanced messages array
 	var messages = []
 	
 	# Add system prompt if set
