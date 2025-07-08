@@ -7,7 +7,7 @@
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
   [![Version](https://img.shields.io/badge/Version-3.0.0-green.svg)](https://github.com/Godot4-Addons/ai_agent_for_godot4/releases)
   [![Agent](https://img.shields.io/badge/AI-Autonomous_Agent-purple.svg)](https://github.com/Godot4-Addons/ai_agent_for_godot4)
-  [![Donate](https://img.shields.io/badge/💝-Support_Development-orange.svg)](DONATIONS.md)
+  [![Donate](https://img.shields.io/badge/💝-Support_Development-orange.svg)](addons/ai_coding_assistant/docs/DONATIONS.md)
 </div>
 
 🚀 **The World's First Autonomous AI Coding Agent for Godot** - A revolutionary plugin that transforms game development with autonomous error fixing, intelligent task management, real-time terminal monitoring, and advanced codebase analysis.
