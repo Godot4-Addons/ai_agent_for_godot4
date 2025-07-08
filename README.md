@@ -1,14 +1,16 @@
 <div align="center">
   <img src="img/logo_static.svg" alt="AI Coding Assistant Logo" width="128" height="128">
 
-  # 🤖 AI Coding Assistant for Godot 4 [v2.0.0] [Still on DEV MODE]
+  # 🤖 AI Agent for Godot 4 [v3.0.0] - The Agent Revolution
 
   [![Godot 4](https://img.shields.io/badge/Godot-4.x-blue.svg)](https://godotengine.org/)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-  [![Version](https://img.shields.io/badge/Version-2.0.0-green.svg)](https://github.com/Godot4-Addons/ai_assistant_for_godot/releases)
+  [![Version](https://img.shields.io/badge/Version-3.0.0-green.svg)](https://github.com/Godot4-Addons/ai_agent_for_godot4/releases)
+  [![Agent](https://img.shields.io/badge/AI-Autonomous_Agent-purple.svg)](https://github.com/Godot4-Addons/ai_agent_for_godot4)
+  [![Donate](https://img.shields.io/badge/💝-Support_Development-orange.svg)](DONATIONS.md)
 </div>
 
-A **professional-grade AI coding assistant** plugin for Godot 4 that transforms your development workflow with advanced features, responsive design, and enhanced markdown highlighting.
+🚀 **The World's First Autonomous AI Coding Agent for Godot** - A revolutionary plugin that transforms game development with autonomous error fixing, intelligent task management, real-time terminal monitoring, and advanced codebase analysis.
 
 <div align="center">
   <img src="img/banner.svg" alt="AI Coding Assistant Banner" width="100%">
@@ -16,135 +18,213 @@ A **professional-grade AI coding assistant** plugin for Godot 4 that transforms 
 
 <img src="img/image.png" alt="AI Coding Assistant in action" width="100%">
 
-## ✨ **Key Features**
+## 🚀 **Revolutionary AI Agent Features**
 
-### 🎯 **Advanced AI Integration**
-- **Multiple AI Providers**: Gemini, HuggingFace, Cohere support
-- **Smart Code Generation**: Context-aware code suggestions
-- **Real-time Assistance**: Instant help with coding problems
-- **Multi-language Support**: GDScript, Python, JavaScript, JSON
+### 🤖 **Autonomous AI Agent**
+- **Self-Operating**: Works independently to solve coding problems
+- **Goal-Oriented**: Set high-level goals and watch the agent work
+- **Learning Capability**: Improves from experience and user feedback
+- **Multi-Provider AI**: Support for OpenAI, Anthropic, Gemini, Cohere, Ollama, and more
 
-### 🎨 **Professional UI/UX**
-- **Responsive Design**: Adapts to any screen size automatically
-- **Enhanced Markdown**: VS Code-inspired syntax highlighting
-- **Flexible Layout**: Resizable panels and collapsible sections
-- **Modern Theme**: Dark theme optimized for developers
+### 🔧 **Autonomous Error Fixing**
+- **Real-time Error Detection**: Monitors terminal output for errors
+- **Automatic Fixes**: Applies fixes for common errors without user intervention
+- **Smart Pattern Recognition**: Learns from previous fixes
+- **Confidence-based Decisions**: Only applies fixes when confident
 
-### 📱 **Cross-Platform Compatibility**
-- **Multi-Monitor Support**: Seamless adaptation between displays
-- **Screen Size Optimization**: From large monitors to small laptops
-- **Touch-Friendly**: Works great on tablets and touch devices
-- **Godot 4.x Native**: Built specifically for Godot 4
+### 📺 **Terminal Integration**
+- **Command Execution**: Execute terminal commands directly from the agent
+- **Output Monitoring**: Real-time monitoring of terminal output
+- **Error Pattern Detection**: Advanced regex-based error detection
+- **Build Process Integration**: Monitors compilation and runtime errors
+
+### 🧠 **Advanced Codebase Analysis**
+- **Project Structure Understanding**: Deep analysis of entire codebase
+- **Dependency Graph**: Visual representation of code dependencies
+- **Performance Analysis**: Identifies bottlenecks and optimization opportunities
+- **Code Quality Metrics**: Comprehensive code quality assessment
+### 📋 **Intelligent Task Management**
+- **Goal-Oriented Planning**: Break down complex goals into actionable tasks
+- **Priority-based Scheduling**: Intelligent task prioritization and execution
+- **Dependency Management**: Handle task dependencies automatically
+- **Progress Tracking**: Monitor agent performance and success rates
+
+### 🧠 **Agent Memory & Learning**
+- **Persistent Memory**: Remembers errors, solutions, and patterns
+- **Pattern Recognition**: Learns from successful fixes and approaches
+- **Context Awareness**: Understands project structure and coding patterns
+- **Continuous Improvement**: Gets better with each interaction
+
+## 📁 **Project Structure**
+
+The AI Agent is organized with a clean, modular architecture:
+
+```
+addons/ai_coding_assistant/
+├── core/                    # 🧠 Core AI Agent Intelligence
+│   ├── agent_brain.gd      # Central decision-making system
+│   ├── task_manager.gd     # Task scheduling and execution
+│   ├── agent_memory.gd     # Learning and context management
+│   ├── terminal_integration.gd # Terminal monitoring
+│   ├── auto_error_fixer.gd # Autonomous error fixing
+│   └── advanced_code_analyzer.gd # Codebase analysis
+├── ai/                     # 🤖 AI Provider Integration
+│   ├── ai_api_manager.gd   # Multi-provider management
+│   ├── ai_ollama.gd        # Ollama integration
+│   └── ai_utils.gd         # AI utilities
+├── ui/                     # 🖥️ User Interface
+│   ├── ai_assistant_dock.gd # Main interface
+│   ├── settings_dialog.gd  # Configuration
+│   ├── diff_viewer.gd      # Code diff viewer
+│   └── setup_guide.gd     # Setup wizard
+├── utils/                  # 🔧 Utilities
+│   ├── editor_integration.gd # Godot editor integration
+│   ├── code_templates.gd   # Code templates
+│   ├── code_analyzer.gd    # Code analysis
+│   └── default_config.gd   # Default settings
+├── models/                 # 📊 Data Models
+│   └── chat_message.gd    # Message structure
+├── docs/                   # 📚 Documentation
+│   ├── ARCHITECTURE.md     # Technical architecture
+│   ├── CHANGELOG.md        # Version history
+│   └── README.md          # Detailed documentation
+└── assets/                 # 🎨 Visual Assets
+    └── plugin_icon.svg    # Plugin icon
+```
 
 ## 🚀 **Quick Start**
 
 ### 1. **Installation**
 ```bash
 # Clone the repository
-git clone https://github.com/Godot4-Addons/ai_assistant_for_godot.git
+git clone https://github.com/Godot4-Addons/ai_agent_for_godot4.git
 
 # Copy to your project
-cp -r ai_assistant_for_godot/addons/ai_coding_assistant your_project/addons/
+cp -r ai_agent_for_godot4/addons/ai_coding_assistant your_project/addons/
 ```
 
 ### 2. **Enable Plugin**
 1. Open your Godot project
 2. Go to **Project Settings > Plugins**
-3. Find **AI Coding Assistant** and enable it
-4. The AI Assistant dock will appear in the left panel
+3. Find **AI Agent for Godot** and enable it
+4. The AI Agent dock will appear in the left panel
 
-### 3. **Configure API**
-1. Click the **⚙ Settings** button in the AI Assistant dock
-2. Select your preferred AI provider (Gemini recommended)
+### 3. **Configure AI Provider**
+1. Click the **⚙ Settings** button in the AI Agent dock
+2. Select your preferred AI provider (OpenAI, Anthropic, Gemini, etc.)
 3. Enter your API key
-4. Start coding with AI assistance!
+4. **Enable Agent Mode** for autonomous operation
+
+### 4. **Start Using the Agent**
+- **Set Goals**: Give the agent high-level objectives
+- **Monitor Progress**: Watch the agent work autonomously
+- **Review Changes**: Agent shows all modifications before applying
+- **Learn Together**: Agent improves from your feedback
 
 ## 📚 **Documentation**
 
-### 📖 **User Guides**
-- **[Installation Guide](docs/INSTALLATION.md)** - Complete setup instructions
-- **[Quick Start Guide](docs/QUICK_START.md)** - Get started in 5 minutes
-- **[Enhanced Features](docs/ENHANCED_FEATURES.md)** - Overview of all features
-- **[Version Compatibility](docs/VERSION_COMPATIBILITY.md)** - Godot version support
+### 🚀 **Agent Documentation**
+- **[Architecture Guide](addons/ai_coding_assistant/docs/ARCHITECTURE.md)** - Technical architecture and design
+- **[Agent User Guide](addons/ai_coding_assistant/docs/README.md)** - Complete user documentation
+- **[Changelog](addons/ai_coding_assistant/docs/CHANGELOG.md)** - Version history and updates
+- **[Editor Integration](addons/ai_coding_assistant/docs/EDITOR_INTEGRATION_GUIDE.md)** - Editor integration details
 
-### 🎨 **UI & Design**
-- **[Flexible UI Guide](docs/FLEXIBLE_UI_GUIDE.md)** - Responsive design features
-- **[Flexible Boxes Guide](docs/FLEXIBLE_BOXES_GUIDE.md)** - UI component details
-- **[Enhanced Markdown Guide](docs/ENHANCED_MARKDOWN_GUIDE.md)** - Syntax highlighting
-- **[Markdown Examples](docs/MARKDOWN_EXAMPLES.md)** - Visual examples
+### 🤖 **Agent Features**
+- **Autonomous Operation** - Set goals and let the agent work independently
+- **Error Auto-Fixing** - Automatically detects and fixes common coding errors
+- **Terminal Integration** - Real-time monitoring and command execution
+- **Codebase Analysis** - Deep understanding of project structure and dependencies
+- **Learning System** - Improves performance through experience and feedback
 
-### 🔧 **Technical Documentation**
-- **[Property Fixes](docs/PROPERTY_FIXES_COMPLETE.md)** - Godot 4.x compatibility
-- **[Syntax Fixes](docs/SYNTAX_FIXES_COMPLETE.md)** - Code improvements
-- **[Upgrade Summary](docs/UPGRADE_SUMMARY.md)** - What's new in v2.0
-- **[Final Status Report](docs/FINAL_STATUS_REPORT.md)** - Complete feature list
+### 🔧 **Technical Features**
+- **Multi-AI Provider Support** - OpenAI, Anthropic, Gemini, Cohere, Ollama
+- **Modular Architecture** - Clean separation of concerns for easy maintenance
+- **Professional UI** - Responsive design with enhanced markdown support
+- **Cross-Platform** - Works seamlessly across different operating systems
 
-### 🧪 **Development & Testing**
-- **[Testing Guide](docs/TESTING.md)** - How to run tests
-- **[Addon Documentation](docs/ADDON_README.md)** - Plugin architecture
-- **[Commit History](docs/COMMIT_MESSAGE.md)** - Development changelog
+## 🎯 **Agent Capabilities**
 
-## 🎯 **Core Features**
+### **🤖 Autonomous Operation**
+- **Goal-Oriented Planning**: Set high-level objectives and let the agent work
+- **Task Decomposition**: Automatically breaks down complex goals into actionable tasks
+- **Independent Execution**: Works autonomously while you focus on other tasks
+- **Progress Monitoring**: Real-time updates on agent activities and progress
 
-### **AI-Powered Coding**
-- **Code Generation**: Generate functions, classes, and complete scripts
-- **Code Explanation**: Understand complex code with AI explanations
-- **Code Improvement**: Get suggestions for optimization and best practices
-- **Error Debugging**: AI-assisted debugging and error resolution
+### **🔧 Intelligent Error Fixing**
+- **Real-time Detection**: Monitors terminal output for errors and warnings
+- **Pattern Recognition**: Learns from previous fixes to improve accuracy
+- **Automatic Application**: Applies fixes with confidence-based decision making
+- **Backup Creation**: Creates backups before making any changes
 
-### **Enhanced User Interface**
-- **Responsive Design**: Automatically adapts to screen size
-- **Professional Styling**: VS Code-inspired dark theme
-- **Flexible Layout**: Resizable chat and code panels
-- **Context Menus**: Right-click for quick actions
+### **📺 Terminal Integration**
+- **Command Execution**: Execute terminal commands directly from the agent
+- **Output Analysis**: Real-time parsing of build and runtime output
+- **Error Classification**: Categorizes errors by type and severity
+- **Build Monitoring**: Tracks compilation and deployment processes
 
-### **Advanced Markdown Support**
-- **Syntax Highlighting**: GDScript, Python, JavaScript, JSON
-- **Rich Formatting**: Headers, lists, quotes, links
-- **Code Blocks**: Language-labeled with professional styling
-- **Real-time Rendering**: See formatting as you type
+### **🧠 Advanced Analysis**
+- **Project Understanding**: Deep analysis of entire codebase structure
+- **Dependency Mapping**: Visual representation of code dependencies
+- **Performance Insights**: Identifies optimization opportunities
+- **Quality Metrics**: Comprehensive code quality assessment
 
-## 📱 **Screen Size Support**
+## 🎮 **Agent Usage Examples**
 
-| Screen Size | Layout | Features |
-|-------------|--------|----------|
-| **Large (>1000px)** | Expanded | Full features, generous spacing |
-| **Medium (600-1000px)** | Balanced | Optimized for productivity |
-| **Small (400-600px)** | Compact | Auto-collapse, space efficient |
-| **Mobile (<400px)** | Minimal | Essential functions only |
-
-## 🎨 **Visual Examples**
-
-### **Enhanced Markdown Highlighting**
-```gdscript
-# GDScript with syntax highlighting
-func _ready():
-    var message = "Hello, AI Assistant!"
-    print(message)
+### **Setting Agent Goals**
+```
+🎯 Goal: "Fix all compilation errors in the project"
+📋 Agent creates tasks:
+  1. Analyze project for errors
+  2. Categorize errors by type
+  3. Apply appropriate fixes
+  4. Verify fixes work correctly
 ```
 
-### **Professional Code Blocks**
-- **Language Labels**: Clear indicators for each code block
-- **Syntax Colors**: Keywords, strings, comments highlighted
-- **Line Numbers**: Optional line numbering for code
-- **Copy/Save**: One-click code operations
+### **Autonomous Error Fixing**
+```
+📺 Terminal Output: "ERROR: Identifier 'player_speed' not declared"
+🤖 Agent Response:
+  1. Detects undefined variable error
+  2. Analyzes context and usage
+  3. Adds proper variable declaration
+  4. Creates backup before applying fix
+```
 
-## 🔧 **API Providers**
+### **Codebase Analysis**
+```
+📊 Project Analysis Results:
+  - 🏗️ Structure: 45 scripts, 12 scenes
+  - 🔗 Dependencies: 3 circular dependencies found
+  - 📈 Metrics: 85% maintainability score
+  - ⚡ Performance: 2 optimization opportunities
+```
 
-### **Gemini (Recommended)**
-- **Model**: gemini-2.0-flash
-- **Features**: Fast, accurate, cost-effective
+## 🔧 **AI Provider Support**
+
+### **OpenAI** (Recommended for Agents)
+- **Models**: GPT-4, GPT-4 Turbo, GPT-3.5 Turbo
+- **Features**: Excellent reasoning, reliable for autonomous tasks
+- **Setup**: Get API key from OpenAI Platform
+
+### **Anthropic Claude**
+- **Models**: Claude-3 Opus, Sonnet, Haiku
+- **Features**: Superior code understanding, safety-focused
+- **Setup**: Get API key from Anthropic Console
+
+### **Google Gemini**
+- **Models**: Gemini Pro, Gemini Flash
+- **Features**: Fast, cost-effective, good for analysis
 - **Setup**: Get API key from Google AI Studio
 
-### **HuggingFace**
-- **Models**: Various open-source models
-- **Features**: Free tier available
-- **Setup**: Get API key from HuggingFace
+### **Ollama** (Local AI)
+- **Models**: Llama, CodeLlama, Mistral, and more
+- **Features**: Privacy-focused, runs locally, no API costs
+- **Setup**: Install Ollama and download models locally
 
-### **Cohere**
-- **Models**: Command series
-- **Features**: Enterprise-grade
-- **Setup**: Get API key from Cohere
+### **Cohere & Others**
+- **Multiple Providers**: Groq, HuggingFace, and more
+- **Features**: Specialized models for different use cases
+- **Setup**: Provider-specific API keys
 
 ## 🛠️ **Development**
 
@@ -156,11 +236,11 @@ func _ready():
 ### **Building from Source**
 ```bash
 # Clone repository
-git clone https://github.com/Godot4-Addons/ai_assistant_for_godot.git
-cd ai_assistant_for_godot
+git clone https://github.com/Godot4-Addons/ai_agent_for_godot4.git
+cd ai_agent_for_godot4
 
-# Run tests
-godot --headless --script test/run_all_tests.gd
+# Test the agent components
+godot --headless --script test/run_agent_tests.gd
 
 # Install in your project
 cp -r addons/ai_coding_assistant /path/to/your/project/addons/
@@ -173,20 +253,39 @@ cp -r addons/ai_coding_assistant /path/to/your/project/addons/
 4. Add tests for new features
 5. Submit a pull request
 
-## 📊 **Statistics**
+## 📊 **Agent Statistics**
 
-- **🎯 4 AI Providers**: Gemini, HuggingFace, Cohere, Custom
-- **🎨 4 Languages**: GDScript, Python, JavaScript, JSON syntax highlighting
-- **📱 4 Screen Sizes**: Optimized layouts for all display types
-- **🔧 20+ Features**: Comprehensive development assistance
-- **📚 15+ Docs**: Complete documentation and guides
-- **🧪 25+ Tests**: Thorough quality assurance
+- **🤖 6 Core Modules**: Complete autonomous agent architecture
+- **🔧 5+ AI Providers**: OpenAI, Anthropic, Gemini, Ollama, and more
+- **🧠 4 Intelligence Systems**: Brain, Memory, Tasks, Analysis
+- **📺 Real-time Monitoring**: Terminal integration and error detection
+- **🎯 Autonomous Operation**: Goal-oriented task execution
+- **📁 Professional Structure**: Modular, maintainable codebase
+- **🔄 Continuous Learning**: Improves with each interaction
 
 ## 🤝 **Community**
 
-- **GitHub Issues**: [Report bugs and request features](https://github.com/Godot4-Addons/ai_assistant_for_godot/issues)
-- **Discussions**: [Join the community discussion](https://github.com/Godot4-Addons/ai_assistant_for_godot/discussions)
-- **Wiki**: [Community-maintained documentation](https://github.com/Godot4-Addons/ai_assistant_for_godot/wiki)
+- **GitHub Issues**: [Report bugs and request features](https://github.com/Godot4-Addons/ai_agent_for_godot4/issues)
+- **Discussions**: [Join the community discussion](https://github.com/Godot4-Addons/ai_agent_for_godot4/discussions)
+- **Wiki**: [Community-maintained documentation](https://github.com/Godot4-Addons/ai_agent_for_godot4/wiki)
+- **Agent Development**: [Contribute to agent intelligence](https://github.com/Godot4-Addons/ai_agent_for_godot4/blob/main/addons/ai_coding_assistant/docs/ARCHITECTURE.md)
+
+## 💝 **Support Development**
+
+If this AI Agent has helped improve your game development workflow, consider supporting its continued development:
+
+### **Cryptocurrency Donations**
+- **Binance Pay ID**: `1010167458`
+- **Bybit UID**: `389218671`
+
+### **Other Ways to Support**
+- ⭐ **Star the Repository**: Help others discover this project
+- 🐛 **Report Issues**: Help improve the agent's reliability
+- 📝 **Contribute Code**: Add new features or fix bugs
+- 📚 **Improve Documentation**: Help other developers get started
+- 💬 **Share Your Experience**: Tell others about the AI Agent
+
+Your support helps maintain and improve this revolutionary tool for the Godot community! 🚀
 
 ## 📄 **License**
 
@@ -194,14 +293,21 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 **Acknowledgments**
 
-- **Godot Engine**: For the amazing game engine
-- **AI Providers**: Gemini, HuggingFace, Cohere for AI capabilities
+- **Godot Engine**: For the amazing game engine and development platform
+- **AI Providers**: OpenAI, Anthropic, Google, and others for AI capabilities
 - **Community**: Contributors and users who make this project better
-- **VS Code**: Inspiration for the syntax highlighting theme
+- **Open Source**: The incredible open-source ecosystem that makes this possible
 
 ---
 
-**Made with ❤️ for the Godot community**
+<div align="center">
 
-*Transform your Godot development experience with professional AI assistance!* 🚀✨
-# ai_agent_for_godot4
+**🤖 Made with ❤️ for the Godot community**
+
+*Experience the future of game development with autonomous AI assistance!*
+
+**🚀 The World's First AI Agent for Godot 4 🚀**
+
+**💝 Support Development**: [Binance Pay `1010167458`](DONATIONS.md) | [Bybit UID `389218671`](DONATIONS.md)
+
+</div>

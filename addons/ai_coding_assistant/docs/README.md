@@ -74,13 +74,30 @@ The plugin is organized into logical modules:
 
 ### 2. Setup
 
-1. **Enable Plugin**: Go to Project Settings > Plugins and enable "AI Coding Assistant"
-2. **Get API Key**: 
-   - For Gemini (recommended): Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - For Hugging Face: Visit [HF Tokens](https://huggingface.co/settings/tokens)
-   - For Cohere: Visit [Cohere Dashboard](https://dashboard.cohere.ai/api-keys)
-3. **Configure**: Open the AI Assistant dock and enter your API key
-4. **Test**: Send a message like "Hello, can you help me with GDScript?"
+1. **Enable Plugin**: Go to Project Settings > Plugins and enable "AI Agent for Godot"
+2. **Get API Key**:
+   - For OpenAI (recommended for agents): Visit [OpenAI Platform](https://platform.openai.com/api-keys)
+   - For Anthropic: Visit [Anthropic Console](https://console.anthropic.com/)
+   - For Gemini: Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+   - For Ollama (local): Install [Ollama](https://ollama.ai/) and download models
+3. **Configure**: Open the AI Agent dock and enter your API key
+4. **Enable Agent Mode**: Toggle autonomous operation for advanced features
+5. **Test**: Send a message like "Hello, can you help me with GDScript?" or set a goal
+
+## 🤖 **Agent Operation Modes**
+
+### **Manual Mode** (Default)
+- Traditional AI assistant behavior
+- User-initiated actions and responses
+- Interactive code generation and help
+- Perfect for learning and exploration
+
+### **Autonomous Mode** (Advanced)
+- Agent works independently on goals
+- Automatic error detection and fixing
+- Real-time terminal monitoring
+- Intelligent task management
+- Continuous learning and improvement
 
 ### 3. First Steps
 
@@ -225,6 +242,23 @@ cd ai_assistant_for_godot4
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 💝 **Support the Project**
+
+If the AI Agent has enhanced your Godot development experience, consider supporting its development:
+
+### **Cryptocurrency Donations**
+- **Binance Pay ID**: `1010167458`
+- **Bybit UID**: `389218671`
+
+### **Community Support**
+- ⭐ Star the repository on GitHub
+- 🗣️ Share your experience with other developers
+- 📝 Write tutorials or blog posts about the AI Agent
+- 🎥 Create video content showcasing features
+- 💬 Help answer questions in discussions
+
+Your support enables continued development of advanced AI features and helps maintain this free, open-source tool for the entire Godot community! 🚀
 
 ## 🙏 Acknowledgments
 
