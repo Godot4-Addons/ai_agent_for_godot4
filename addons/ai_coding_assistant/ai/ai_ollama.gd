@@ -414,6 +414,8 @@ func send_chat_message(message: String, use_context: bool = true, request_id: St
 			"content": message
 		})
 
+	return actual_request_id
+
 func generate_code(prompt: String, language: String = "gdscript") -> void:
 	"""Generate code with specialized prompt"""
 	var code_prompt = "You are an expert " + language + " programmer. Generate clean, well-commented, and efficient code based on this request. Only return the code without explanations unless specifically asked:\n\n" + prompt
