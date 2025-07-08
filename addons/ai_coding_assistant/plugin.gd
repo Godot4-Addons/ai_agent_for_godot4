@@ -30,23 +30,23 @@ func _initialize_agent_components():
 	print("Setting up AI Agent components...")
 
 	# Create terminal integration
-	terminal_integration = preload("res://addons/ai_coding_assistant/terminal_integration.gd").new()
+	terminal_integration = preload("res://addons/ai_coding_assistant/core/terminal_integration.gd").new()
 	dock.add_child(terminal_integration)
 
 	# Create agent memory
-	agent_memory = preload("res://addons/ai_coding_assistant/agent_memory.gd").new()
+	agent_memory = preload("res://addons/ai_coding_assistant/core/agent_memory.gd").new()
 	dock.add_child(agent_memory)
 
 	# Create task manager
-	task_manager = preload("res://addons/ai_coding_assistant/task_manager.gd").new()
+	task_manager = preload("res://addons/ai_coding_assistant/core/task_manager.gd").new()
 	dock.add_child(task_manager)
 
 	# Create auto error fixer
-	auto_error_fixer = preload("res://addons/ai_coding_assistant/auto_error_fixer.gd").new()
+	auto_error_fixer = preload("res://addons/ai_coding_assistant/core/auto_error_fixer.gd").new()
 	dock.add_child(auto_error_fixer)
 
 	# Create agent brain (main coordinator)
-	agent_brain = preload("res://addons/ai_coding_assistant/agent_brain.gd").new()
+	agent_brain = preload("res://addons/ai_coding_assistant/core/agent_brain.gd").new()
 	dock.add_child(agent_brain)
 
 	# Connect components to dock
