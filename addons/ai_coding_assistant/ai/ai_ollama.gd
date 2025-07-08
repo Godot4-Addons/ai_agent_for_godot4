@@ -507,7 +507,7 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 			error_msg += " - Model not found or Ollama not running"
 		elif response_code == 500:
 			error_msg += " - Internal server error"
-		error_occurred.emit(error_msg)
+		error_occurred.emit(error_msg, "")
 		return
 
 	var response_text = body.get_string_from_utf8()
@@ -516,7 +516,7 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 	var json = JSON.new()
 	var parse_result = json.parse(response_text)
 	if parse_result != OK:
-		error_occurred.emit("Failed to parse Ollama response")
+		error_occurred.emit("Failed to parse Ollama response", "")
 		return
 
 	var response_data = json.data
@@ -531,22 +531,22 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 				"role": "assistant",
 				"content": message_content
 			})
-			response_received.emit(message_content)
+			response_received.emit(message_content, "")
 		else:
-			error_occurred.emit("Empty response from Ollama")
+			error_occurred.emit("Empty response from Ollama", "")
 	elif "embedding" in response_data:
 		# Embeddings response
 		var embeddings = response_data["embedding"]
-		response_received.emit("Embeddings generated: " + str(embeddings.size()) + " dimensions")
+		response_received.emit("Embeddings generated: " + str(embeddings.size()) + " dimensions", "")
 	else:
-		error_occurred.emit("Unknown response format from Ollama")
+		error_occurred.emit("Unknown response format from Ollama", "")
 
 func _on_stream_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
 	"""Handle streaming responses"""
 	print("Ollama stream completed - Result: ", result, " Response code: ", response_code)
 
 	if response_code != 200:
-		error_occurred.emit("Ollama stream failed with code: " + str(response_code))
+		error_occurred.emit("Ollama stream failed with code: " + str(response_code), "")
 		return
 
 	var response_text = body.get_string_from_utf8()
@@ -576,7 +576,7 @@ func _on_stream_completed(result: int, response_code: int, headers: PackedString
 					"role": "assistant",
 					"content": full_response
 				})
-				response_received.emit(full_response)
+				response_received.emit(full_response, "")
 			break
 
 func _on_model_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
@@ -585,16 +585,16 @@ func _on_model_request_completed(result: int, response_code: int, headers: Packe
 
 	if response_code != 200:
 		if response_code == 404:
-			error_occurred.emit("Ollama server not found - is it running on " + base_url + "?")
+			error_occurred.emit("Ollama server not found - is it running on " + base_url + "?", "")
 		else:
-			error_occurred.emit("Model request failed with code: " + str(response_code))
+			error_occurred.emit("Model request failed with code: " + str(response_code), "")
 		return
 
 	var response_text = body.get_string_from_utf8()
 	var json = JSON.new()
 	var parse_result = json.parse(response_text)
 	if parse_result != OK:
-		error_occurred.emit("Failed to parse model response")
+		error_occurred.emit("Failed to parse model response", "")
 		return
 
 	var response_data = json.data

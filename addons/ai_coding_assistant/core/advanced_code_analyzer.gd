@@ -201,7 +201,7 @@ static func _analyze_project_config(structure: Dictionary, config_path: String) 
 		elif current_section == "application" and line.begins_with("run/main_scene"):
 			var parts = line.split("=")
 			if parts.size() >= 2:
-				structure["main_scenes"].append(parts[1].strip_edges().strip_edges("\""))
+				structure["main_scenes"].append(parts[1].strip_edges().trim_prefix("\"").trim_suffix("\""))
 	
 	return structure
 
@@ -339,7 +339,7 @@ static func _extract_path_from_extends(line: String) -> String:
 	var parts = line.split(" ")
 	for part in parts:
 		if part.begins_with("\"res://") or part.begins_with("'res://"):
-			return part.strip_edges("\"'")
+			return part.strip_edges().trim_prefix("\"").trim_suffix("\"").trim_prefix("'").trim_suffix("'")
 	return ""
 
 static func _classify_file_type(file_path: String) -> String:
