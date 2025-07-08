@@ -80,14 +80,14 @@ func _ready():
 	call_deferred("_connect_viewport_signals")
 
 	# Create and add API manager as a child node
-	api_manager = preload("res://addons/ai_coding_assistant/ai_api_manager.gd").new()
+	api_manager = preload("res://addons/ai_coding_assistant/ai/ai_api_manager.gd").new()
 	add_child(api_manager)
 	api_manager.response_received.connect(_on_response_received)
 	api_manager.error_occurred.connect(_on_error_occurred)
 
 	# Initialize editor integration if EditorInterface is available
 	if plugin_editor_interface:
-		editor_integration = preload("res://addons/ai_coding_assistant/editor_integration.gd").new(plugin_editor_interface)
+		editor_integration = preload("res://addons/ai_coding_assistant/utils/editor_integration.gd").new(plugin_editor_interface)
 		editor_integration.code_inserted.connect(_on_code_inserted)
 		editor_integration.code_replaced.connect(_on_code_replaced)
 		editor_integration.selection_changed.connect(_on_selection_changed)
@@ -1520,7 +1520,7 @@ func _quick_generate(prompt: String):
 
 func _on_generate_class():
 	_add_to_chat("System", "Generating Player Movement Template", Color.YELLOW)
-	var CodeTemplates = preload("res://addons/ai_coding_assistant/code_templates.gd")
+	var CodeTemplates = preload("res://addons/ai_coding_assistant/utils/code_templates.gd")
 	var template = CodeTemplates.get_template("player_movement")
 	if template != "":
 		code_output.text = template
@@ -1531,7 +1531,7 @@ func _on_generate_class():
 
 func _on_generate_singleton():
 	_add_to_chat("System", "Generating Singleton Template", Color.YELLOW)
-	var CodeTemplates = preload("res://addons/ai_coding_assistant/code_templates.gd")
+	var CodeTemplates = preload("res://addons/ai_coding_assistant/utils/code_templates.gd")
 	var template = CodeTemplates.get_template("singleton")
 	if template != "":
 		code_output.text = template
@@ -1542,7 +1542,7 @@ func _on_generate_singleton():
 
 func _on_generate_ui():
 	_add_to_chat("System", "Generating UI Controller Template", Color.YELLOW)
-	var CodeTemplates = preload("res://addons/ai_coding_assistant/code_templates.gd")
+	var CodeTemplates = preload("res://addons/ai_coding_assistant/utils/code_templates.gd")
 	var template = CodeTemplates.get_template("ui_controller")
 	if template != "":
 		code_output.text = template
@@ -1553,7 +1553,7 @@ func _on_generate_ui():
 
 func _on_generate_save_system():
 	_add_to_chat("System", "Generating Save System Template", Color.YELLOW)
-	var CodeTemplates = preload("res://addons/ai_coding_assistant/code_templates.gd")
+	var CodeTemplates = preload("res://addons/ai_coding_assistant/utils/code_templates.gd")
 	var template = CodeTemplates.get_template("save_system")
 	if template != "":
 		code_output.text = template
@@ -1564,7 +1564,7 @@ func _on_generate_save_system():
 
 func _on_generate_audio_manager():
 	_add_to_chat("System", "Generating Audio Manager Template", Color.YELLOW)
-	var CodeTemplates = preload("res://addons/ai_coding_assistant/code_templates.gd")
+	var CodeTemplates = preload("res://addons/ai_coding_assistant/utils/code_templates.gd")
 	var template = CodeTemplates.get_template("audio_manager")
 	if template != "":
 		code_output.text = template
@@ -1575,7 +1575,7 @@ func _on_generate_audio_manager():
 
 func _on_generate_state_machine():
 	_add_to_chat("System", "Generating State Machine Template", Color.YELLOW)
-	var CodeTemplates = preload("res://addons/ai_coding_assistant/code_templates.gd")
+	var CodeTemplates = preload("res://addons/ai_coding_assistant/utils/code_templates.gd")
 	var template = CodeTemplates.get_template("state_machine")
 	if template != "":
 		code_output.text = template
@@ -1605,7 +1605,7 @@ func _on_response_received(response: String):
 		return
 
 	# If response looks like code, put it in the code output
-	var AIUtils = preload("res://addons/ai_coding_assistant/ai_utils.gd")
+	var AIUtils = preload("res://addons/ai_coding_assistant/ai/ai_utils.gd")
 	if AIUtils.is_code_response(response):
 		current_generated_code = AIUtils.extract_code_from_response(response)
 		code_output.text = current_generated_code
@@ -1613,7 +1613,7 @@ func _on_response_received(response: String):
 
 func _handle_insert_at_cursor_response(response: String):
 	"""Handle response for insert at cursor operation"""
-	var AIUtils = preload("res://addons/ai_coding_assistant/ai_utils.gd")
+	var AIUtils = preload("res://addons/ai_coding_assistant/ai/ai_utils.gd")
 	var code_to_insert = ""
 
 	if AIUtils.is_code_response(response):
@@ -1632,7 +1632,7 @@ func _handle_insert_at_cursor_response(response: String):
 
 func _handle_replace_selection_response(response: String):
 	"""Handle response for replace selection operation"""
-	var AIUtils = preload("res://addons/ai_coding_assistant/ai_utils.gd")
+	var AIUtils = preload("res://addons/ai_coding_assistant/ai/ai_utils.gd")
 	var code_to_replace = ""
 
 	if AIUtils.is_code_response(response):
@@ -1650,7 +1650,7 @@ func _handle_replace_selection_response(response: String):
 
 func _handle_function_replacement_response(response: String):
 	"""Handle response for function replacement operation"""
-	var AIUtils = preload("res://addons/ai_coding_assistant/ai_utils.gd")
+	var AIUtils = preload("res://addons/ai_coding_assistant/ai/ai_utils.gd")
 	var new_function_code = ""
 
 	if AIUtils.is_code_response(response):

@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="plugin_icon.svg" alt="AI Agent for Godot Logo" width="128" height="128">
+  <img src="../assets/plugin_icon.svg" alt="AI Agent for Godot Logo" width="128" height="128">
 
   # AI Agent for Godot 4
 
@@ -59,6 +59,18 @@
 1. Download the latest release from GitHub
 2. Extract to your project's `addons/` folder
 3. Enable the plugin in **Project Settings > Plugins**
+
+## 📁 **Project Structure**
+
+The plugin is organized into logical modules:
+
+- **`core/`** - Core AI agent intelligence and automation
+- **`ai/`** - AI provider integrations and utilities
+- **`ui/`** - User interface components and dialogs
+- **`utils/`** - Utility functions and editor integration
+- **`models/`** - Data models and structures
+- **`docs/`** - Documentation and guides
+- **`assets/`** - Icons and visual assets
 
 ### 2. Setup
 
@@ -205,8 +217,8 @@ We welcome contributions! Here's how to help:
 
 ### Development Setup
 ```bash
-git clone https://github.com/your-repo/ai_assistant_for_godot.git
-cd ai_assistant_for_godot
+git clone https://github.com/godot4-addons/ai_assistant_for_godot4.git
+cd ai_assistant_for_godot4
 # Open in Godot 4.x for testing
 ```
 

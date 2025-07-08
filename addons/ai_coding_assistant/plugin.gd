@@ -12,7 +12,7 @@ func _enter_tree():
 	print("Initializing AI Agent for Godot...")
 
 	# Load and create the dock
-	var dock_script = load("res://addons/ai_coding_assistant/ai_assistant_dock.gd")
+	var dock_script = load("res://addons/ai_coding_assistant/ui/ai_assistant_dock.gd")
 	dock = dock_script.new()
 
 	# Pass the EditorInterface to the dock

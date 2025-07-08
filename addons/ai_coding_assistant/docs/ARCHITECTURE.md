@@ -13,22 +13,35 @@ addons/ai_coding_assistant/
 │   └── advanced_code_analyzer.gd  # Deep codebase analysis
 ├── ai/                            # AI Provider Integration
 │   ├── ai_api_manager.gd          # Multi-provider AI API management
-│   └── providers/                 # Individual AI provider implementations
+│   ├── ai_ollama.gd               # Ollama provider implementation
+│   └── ai_utils.gd                # AI-related utilities
 ├── ui/                            # User Interface Components
 │   ├── ai_assistant_dock.gd       # Main dock interface
 │   ├── settings_dialog.gd         # Configuration dialog
-│   └── diff_viewer.gd             # Code diff visualization
+│   ├── diff_viewer.gd             # Code diff visualization
+│   └── setup_guide.gd             # Setup and configuration guide
 ├── utils/                         # Utility Functions
-│   ├── ai_utils.gd                # AI-related utilities
+│   ├── code_analyzer.gd           # Code analysis utilities
 │   ├── code_templates.gd          # Code template system
-│   └── editor_integration.gd     # Godot editor integration
+│   ├── editor_integration.gd      # Godot editor integration
+│   └── default_config.gd          # Default configuration settings
 ├── models/                        # Data Models
 │   └── chat_message.gd           # Chat message data structure
+├── agent/                         # Legacy Agent Components
+│   ├── check_err.gd               # Error checking utilities
+│   ├── code_analyzer.gd           # Legacy code analyzer
+│   ├── coder.gd                   # Legacy coding utilities
+│   ├── file_manager.gd            # File management utilities
+│   └── wait_for_current_job.gd    # Job waiting utilities
+├── docs/                          # Documentation
+│   ├── ARCHITECTURE.md            # Architecture documentation
+│   ├── CHANGELOG.md               # Version history
+│   ├── EDITOR_INTEGRATION_GUIDE.md # Editor integration guide
+│   └── README.md                  # Main documentation
+├── assets/                        # Assets and Resources
+│   └── plugin_icon.svg           # Plugin icon
 ├── plugin.gd                     # Main plugin entry point
-├── plugin.cfg                    # Plugin configuration
-├── README.md                     # Documentation
-├── CHANGELOG.md                  # Version history
-└── ARCHITECTURE.md               # This file
+└── plugin.cfg                    # Plugin configuration
 ```
 
 ## 🧠 **Core Agent Architecture**

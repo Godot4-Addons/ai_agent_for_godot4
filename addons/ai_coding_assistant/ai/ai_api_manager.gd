@@ -58,7 +58,7 @@ func _ready():
 	http_request.request_completed.connect(_on_request_completed)
 
 	# Initialize dedicated Ollama handler
-	ollama_handler = preload("res://addons/ai_coding_assistant/ai_ollama.gd").new()
+	ollama_handler = preload("res://addons/ai_coding_assistant/ai/ai_ollama.gd").new()
 	add_child(ollama_handler)
 	ollama_handler.response_received.connect(_on_ollama_response)
 	ollama_handler.error_occurred.connect(_on_ollama_error)
