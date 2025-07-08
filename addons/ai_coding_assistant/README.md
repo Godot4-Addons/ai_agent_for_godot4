@@ -1,25 +1,37 @@
 <div align="center">
-  <img src="plugin_icon.svg" alt="AI Coding Assistant Logo" width="128" height="128">
+  <img src="plugin_icon.svg" alt="AI Agent for Godot Logo" width="128" height="128">
 
-  # AI Coding Assistant for Godot
+  # AI Agent for Godot 4
 
-  A powerful AI-powered coding assistant plugin for Godot 4.x that helps you write better code faster.
+  🤖 **The World's First Autonomous AI Coding Agent for Godot**
+  Advanced AI agent with autonomous error fixing, terminal integration, codebase analysis, and intelligent task management.
 </div>
 
-## ✨ Features
+## 🚀 **Revolutionary AI Agent Features**
 
-### 🤖 **AI-Powered Assistance**
-- **Real-time Chat**: Ask questions and get instant coding help
-- **Code Generation**: Generate complete scripts and functions
-- **Code Explanation**: Understand complex code with AI explanations
-- **Code Improvement**: Get suggestions for optimization and best practices
-- **Multiple AI Providers**: Support for Google Gemini, Hugging Face, and Cohere
+### 🤖 **Autonomous AI Agent**
+- **Self-Operating**: Works independently to solve coding problems
+- **Goal-Oriented**: Set high-level goals and watch the agent work
+- **Learning Capability**: Improves from experience and user feedback
+- **Multi-Provider AI**: Support for Google Gemini, OpenAI, Anthropic, Cohere, Ollama, and more
 
-### 🎯 **Smart Code Tools**
-- **Quick Actions**: Pre-built templates for common game development patterns
-- **Code Templates**: Player movement, UI controllers, save systems, and more
-- **Syntax Analysis**: Real-time code validation and suggestions
-- **Context Awareness**: AI understands your current project context
+### 🔧 **Autonomous Error Fixing**
+- **Real-time Error Detection**: Monitors terminal output for errors
+- **Automatic Fixes**: Applies fixes for common errors without user intervention
+- **Smart Pattern Recognition**: Learns from previous fixes
+- **Confidence-based Decisions**: Only applies fixes when confident
+
+### 📺 **Terminal Integration**
+- **Command Execution**: Execute terminal commands directly from the agent
+- **Output Monitoring**: Real-time monitoring of terminal output
+- **Error Pattern Detection**: Advanced regex-based error detection
+- **Build Process Integration**: Monitors compilation and runtime errors
+
+### 🧠 **Advanced Codebase Analysis**
+- **Project Structure Understanding**: Deep analysis of entire codebase
+- **Dependency Graph**: Visual representation of code dependencies
+- **Performance Analysis**: Identifies bottlenecks and optimization opportunities
+- **Code Quality Metrics**: Comprehensive code quality assessment
 
 ### 🎨 **Modern UI**
 - **Responsive Design**: Adapts to any screen size

@@ -29,6 +29,13 @@ var settings_content: VBoxContainer
 var chat_container: VBoxContainer
 var code_container: VBoxContainer
 var quick_actions_container: VBoxContainer
+
+# AI Agent Components
+var agent_brain: AgentBrain
+var terminal_integration: TerminalIntegration
+var task_manager: TaskManager
+var agent_memory: AgentMemory
+var auto_error_fixer: AutoErrorFixer
 var quick_content: VBoxContainer
 
 # Context menus and enhanced features
@@ -84,6 +91,38 @@ func _ready():
 		editor_integration.code_inserted.connect(_on_code_inserted)
 		editor_integration.code_replaced.connect(_on_code_replaced)
 		editor_integration.selection_changed.connect(_on_selection_changed)
+
+	# Agent components will be set by the plugin
+	agent_brain = null
+	terminal_integration = null
+	task_manager = null
+	agent_memory = null
+	auto_error_fixer = null
+
+func set_agent_components(brain: AgentBrain, terminal: TerminalIntegration, tasks: TaskManager, memory: AgentMemory, fixer: AutoErrorFixer):
+	"""Set and connect AI agent components"""
+	agent_brain = brain
+	terminal_integration = terminal
+	task_manager = tasks
+	agent_memory = memory
+	auto_error_fixer = fixer
+
+	# Connect agent signals
+	if terminal_integration:
+		terminal_integration.error_detected.connect(_on_agent_error_detected)
+		terminal_integration.warning_detected.connect(_on_agent_warning_detected)
+		terminal_integration.command_executed.connect(_on_agent_command_executed)
+
+	if agent_brain:
+		agent_brain.task_started.connect(_on_agent_task_started)
+		agent_brain.task_completed.connect(_on_agent_task_completed)
+		agent_brain.goal_set.connect(_on_agent_goal_set)
+
+	if auto_error_fixer:
+		auto_error_fixer.error_fix_started.connect(_on_error_fix_started)
+		auto_error_fixer.error_fix_completed.connect(_on_error_fix_completed)
+
+	print("AI Agent components connected to dock")
 
 	# Preload utility classes for better performance
 	# Note: These are used in template generation functions
@@ -2118,3 +2157,94 @@ func _unhandled_key_input(event: InputEvent):
 			if input_field.has_focus():
 				input_field.clear()
 				get_viewport().set_input_as_handled()
+
+# AI Agent Signal Handlers
+func _on_agent_error_detected(error_info: Dictionary):
+	"""Handle error detected by the agent"""
+	var message = "🤖 Agent detected error: " + error_info.get("message", "Unknown error")
+	_add_chat_message(message, "agent")
+
+	# If auto-fix is enabled, let the agent handle it
+	if auto_error_fixer and auto_error_fixer.auto_fix_enabled:
+		_add_chat_message("🔧 Agent is attempting to fix the error automatically...", "agent")
+
+func _on_agent_warning_detected(warning_info: Dictionary):
+	"""Handle warning detected by the agent"""
+	var message = "⚠️ Agent detected warning: " + warning_info.get("message", "Unknown warning")
+	_add_chat_message(message, "agent")
+
+func _on_agent_command_executed(command: String, output: String, exit_code: int):
+	"""Handle command executed by the agent"""
+	var status = "✅" if exit_code == 0 else "❌"
+	var message = status + " Agent executed: " + command
+	if exit_code != 0:
+		message += "\nOutput: " + output
+	_add_chat_message(message, "agent")
+
+func _on_agent_task_started(task: Dictionary):
+	"""Handle task started by the agent"""
+	var message = "🎯 Agent started task: " + task.get("description", "Unknown task")
+	_add_chat_message(message, "agent")
+
+func _on_agent_task_completed(task: Dictionary, result: Dictionary):
+	"""Handle task completed by the agent"""
+	var message = "✅ Agent completed task: " + task.get("description", "Unknown task")
+	if result.has("details"):
+		message += "\nResult: " + str(result["details"])
+	_add_chat_message(message, "agent")
+
+func _on_agent_goal_set(goal: Dictionary):
+	"""Handle goal set by the agent"""
+	var message = "🎯 Agent goal set: " + goal.get("description", "Unknown goal")
+	_add_chat_message(message, "agent")
+
+func _on_error_fix_started(error_info: Dictionary):
+	"""Handle error fix started"""
+	var message = "🔧 Auto-fixing error: " + error_info.get("message", "Unknown error")
+	_add_chat_message(message, "agent")
+
+func _on_error_fix_completed(error_info: Dictionary, fix_result: Dictionary):
+	"""Handle error fix completed"""
+	var success = fix_result.get("success", false)
+	var status = "✅" if success else "❌"
+	var message = status + " Error fix " + ("completed" if success else "failed")
+	if fix_result.has("details"):
+		message += ": " + str(fix_result["details"])
+	_add_chat_message(message, "agent")
+
+# Agent Control Methods
+func enable_agent_mode():
+	"""Enable autonomous agent mode"""
+	if agent_brain:
+		agent_brain.enable_auto_mode()
+		_add_chat_message("🤖 AI Agent autonomous mode enabled", "system")
+
+func disable_agent_mode():
+	"""Disable autonomous agent mode"""
+	if agent_brain:
+		agent_brain.disable_auto_mode()
+		_add_chat_message("🤖 AI Agent autonomous mode disabled", "system")
+
+func set_agent_goal(goal_description: String):
+	"""Set a goal for the agent"""
+	if agent_brain:
+		agent_brain.set_goal(goal_description)
+		_add_chat_message("🎯 Agent goal set: " + goal_description, "system")
+
+func get_agent_status() -> Dictionary:
+	"""Get current agent status"""
+	if agent_brain:
+		return agent_brain.get_status()
+	return {}
+
+func start_terminal_monitoring():
+	"""Start terminal monitoring"""
+	if terminal_integration:
+		terminal_integration.start_monitoring()
+		_add_chat_message("📺 Terminal monitoring started", "system")
+
+func stop_terminal_monitoring():
+	"""Stop terminal monitoring"""
+	if terminal_integration:
+		terminal_integration.stop_monitoring()
+		_add_chat_message("📺 Terminal monitoring stopped", "system")
