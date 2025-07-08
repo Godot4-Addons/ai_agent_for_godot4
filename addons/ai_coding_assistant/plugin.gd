@@ -13,10 +13,13 @@ func _enter_tree():
 
 	# Load and create the dock
 	var dock_script = load("res://addons/ai_coding_assistant/ui/ai_assistant_dock.gd")
-	dock = dock_script.new()
-
-	# Pass the EditorInterface to the dock
-	dock.set_editor_interface(get_editor_interface())
+	if dock_script:
+		dock = dock_script.new()
+		# Pass the EditorInterface to the dock
+		dock.set_editor_interface(get_editor_interface())
+	else:
+		push_error("Failed to load AI Assistant Dock script")
+		return
 
 	# Initialize agent components
 	_initialize_agent_components()

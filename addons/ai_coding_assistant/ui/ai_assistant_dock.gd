@@ -915,15 +915,16 @@ func _update_model_dropdown():
 		return
 
 	model_option.clear()
+	var models = []
 	if api_manager and api_manager.has_method("get_available_models"):
-		var models = api_manager.get_available_models()
+		models = api_manager.get_available_models()
 		for model in models:
 			model_option.add_item(model)
 	else:
 		# Add default models if API manager not available
-		model_option.add_item("llama3.2")
-		model_option.add_item("qwen2.5-coder")
-		var models = ["llama3.2", "qwen2.5-coder"]
+		models = ["llama3.2", "qwen2.5-coder"]
+		for model in models:
+			model_option.add_item(model)
 
 	if models.size() > 0:
 		model_option.selected = 0
