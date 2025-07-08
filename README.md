@@ -308,6 +308,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **🚀 The World's First AI Agent for Godot 4 🚀**
 
-**💝 Support Development**: [Binance Pay `1010167458`](DONATIONS.md) | [Bybit UID `389218671`](DONATIONS.md)
+**💝 Support Development**: [Binance Pay `1010167458`](addons/ai_coding_assistant/docs/DONATIONS.md) | [Bybit UID `389218671`](addons/ai_coding_assistant/docs/DONATIONS.md)
 
 </div>

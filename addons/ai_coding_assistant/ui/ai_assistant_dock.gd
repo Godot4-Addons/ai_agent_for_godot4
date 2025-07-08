@@ -1674,6 +1674,23 @@ func _on_error_occurred(error: String):
 	send_button.disabled = false
 	_add_to_chat("Error", error, Color.RED)
 
+func _add_chat_message(message: String, sender: String = "Agent"):
+	"""Add a chat message with appropriate color based on sender"""
+	var color = Color.WHITE
+	match sender.to_lower():
+		"agent":
+			color = Color.CYAN
+		"system":
+			color = Color.YELLOW
+		"error":
+			color = Color.RED
+		"success":
+			color = Color.GREEN
+		_:
+			color = Color.WHITE
+
+	_add_to_chat(sender, message, color)
+
 func _add_to_chat(sender: String, message: String, color: Color):
 	var color_hex = "#" + color.to_html(false)
 	var formatted_message = _format_message_with_markdown(message)

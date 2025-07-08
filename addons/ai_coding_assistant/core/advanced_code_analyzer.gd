@@ -561,16 +561,16 @@ static func _parse_file_structure(content: String, file_path: String) -> Diction
 		
 		# Parse different elements
 		if trimmed.begins_with("class_name "):
-			var class_name = trimmed.substr(11).strip_edges()
+			var parsed_class_name = trimmed.substr(11).strip_edges()
 			structure["classes"].append({
-				"name": class_name,
+				"name": parsed_class_name,
 				"line": i + 1,
 				"type": "class_name"
 			})
 		elif trimmed.begins_with("class "):
-			var class_name = trimmed.substr(6).split(" ")[0]
+			var parsed_class_name = trimmed.substr(6).split(" ")[0]
 			structure["classes"].append({
-				"name": class_name,
+				"name": parsed_class_name,
 				"line": i + 1,
 				"type": "class"
 			})

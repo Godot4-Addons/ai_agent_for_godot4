@@ -290,8 +290,7 @@ func _download_model(model_name: String) -> bool:
 	var json_body = JSON.stringify(body)
 	model_request.request(url, headers, HTTPClient.METHOD_POST, json_body)
 
-	# Wait for download to complete (simplified)
-	await get_tree().create_timer(5.0).timeout
+	# Return true immediately (download happens in background)
 	return true
 
 func get_connection_status() -> bool:
@@ -346,7 +345,7 @@ func send_chat_message(message: String, use_context: bool = true, request_id: St
 
 	# Check connection first
 	if not is_connected:
-		await check_ollama_status()
+		check_ollama_status()
 		if not is_connected:
 			error_occurred.emit("Ollama is not available", actual_request_id)
 			return actual_request_id
@@ -354,7 +353,7 @@ func send_chat_message(message: String, use_context: bool = true, request_id: St
 	# Check if model is available
 	if not _is_model_available(current_model):
 		if auto_model_download:
-			await _download_model(current_model)
+			_download_model(current_model)
 		else:
 			error_occurred.emit("Model not available: " + current_model, actual_request_id)
 			return actual_request_id

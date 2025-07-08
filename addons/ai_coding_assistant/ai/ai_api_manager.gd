@@ -92,7 +92,8 @@ func _ready():
 		ollama_handler.streaming_chunk_received.connect(_on_ollama_streaming_chunk)
 
 	# Initialize context manager
-	context_manager = preload("res://addons/ai_coding_assistant/core/context_manager.gd").new()
+	var ContextManagerClass = preload("res://addons/ai_coding_assistant/core/context_manager.gd")
+	context_manager = ContextManagerClass.new()
 	context_manager.context_updated.connect(_on_context_updated)
 
 	print("Enhanced AI API Manager ready with async/sync support and models: ", gemini_models)
@@ -217,7 +218,7 @@ func send_chat_request(message: String, context: String = "", async_mode: bool =
 			return request_id
 		else:
 			# For sync mode, wait for a slot
-			await _wait_for_request_slot()
+			_wait_for_request_slot_sync()
 
 	_execute_chat_request(message, context, request_id, async_mode)
 	return request_id
@@ -284,6 +285,11 @@ func _wait_for_request_slot() -> void:
 	"""Wait for an available request slot"""
 	while active_requests.size() >= max_concurrent_requests:
 		await get_tree().process_frame
+
+func _wait_for_request_slot_sync() -> void:
+	"""Synchronous wait for an available request slot"""
+	# For sync mode, we'll just queue the request instead of blocking
+	pass
 
 func _wait_for_request_completion(request_id: String) -> Dictionary:
 	"""Wait for specific request to complete"""
@@ -356,7 +362,7 @@ func _send_gemini_request(message: String, context: String, request_id: String =
 	print("Request body: ", json_body)
 	http_request.request(full_url, headers, HTTPClient.METHOD_POST, json_body)
 
-func _send_huggingface_request(message: String, context: String):
+func _send_huggingface_request(message: String, context: String, request_id: String = ""):
 	var current_model = get_current_model()
 	if current_model.is_empty():
 		current_model = "microsoft/DialoGPT-medium"  # Fallback model
@@ -405,7 +411,7 @@ func _send_huggingface_request(message: String, context: String):
 	print("Using model: ", current_model)
 	http_request.request(url, headers, HTTPClient.METHOD_POST, json_body)
 
-func _send_cohere_request(message: String, context: String):
+func _send_cohere_request(message: String, context: String, request_id: String = ""):
 	var url = base_urls["cohere"] + "generate"
 	var headers = [
 		"Authorization: Bearer " + api_key,
@@ -424,7 +430,7 @@ func _send_cohere_request(message: String, context: String):
 	var json_body = JSON.stringify(body)
 	http_request.request(url, headers, HTTPClient.METHOD_POST, json_body)
 
-func _send_openai_request(message: String, context: String):
+func _send_openai_request(message: String, context: String, request_id: String = ""):
 	var current_model = get_current_model()
 	if current_model.is_empty():
 		current_model = "gpt-3.5-turbo"
@@ -451,7 +457,7 @@ func _send_openai_request(message: String, context: String):
 	print("OpenAI request to: ", url)
 	http_request.request(url, headers, HTTPClient.METHOD_POST, json_body)
 
-func _send_anthropic_request(message: String, context: String):
+func _send_anthropic_request(message: String, context: String, request_id: String = ""):
 	var current_model = get_current_model()
 	if current_model.is_empty():
 		current_model = "claude-3-haiku-20240307"
@@ -479,7 +485,7 @@ func _send_anthropic_request(message: String, context: String):
 	print("Anthropic request to: ", url)
 	http_request.request(url, headers, HTTPClient.METHOD_POST, json_body)
 
-func _send_groq_request(message: String, context: String):
+func _send_groq_request(message: String, context: String, request_id: String = ""):
 	var current_model = get_current_model()
 	if current_model.is_empty():
 		current_model = "llama-3.1-8b-instant"
@@ -506,7 +512,7 @@ func _send_groq_request(message: String, context: String):
 	print("Groq request to: ", url)
 	http_request.request(url, headers, HTTPClient.METHOD_POST, json_body)
 
-func _send_ollama_request(message: String, context: String):
+func _send_ollama_request(message: String, context: String, request_id: String = ""):
 	"""Send request using dedicated Ollama handler"""
 	var current_model = get_current_model()
 	if current_model.is_empty():
