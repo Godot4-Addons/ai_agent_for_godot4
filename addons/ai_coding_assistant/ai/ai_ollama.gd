@@ -29,7 +29,7 @@ var max_retries: int = 3
 var connection_timeout: float = 30.0
 var chunk_timeout: float = 5.0
 var auto_model_download: bool = false
-var preferred_models: Array[String] = ["qwen2.5-coder", "llama3.2", "codellama:7b"]
+var preferred_models: Array = ["qwen2.5-coder", "llama3.2", "codellama:7b"]
 
 # Request tracking
 var active_requests: Dictionary = {}
@@ -44,11 +44,11 @@ var stream_request: HTTPRequest
 var model_request: HTTPRequest
 
 # Available models with metadata
-var available_models: Array[Dictionary] = []
+var available_models: Array = []
 var model_info: Dictionary = {}
 
 # Conversation context
-var conversation_history: Array[Dictionary] = []
+var conversation_history: Array = []
 var system_prompt: String = ""
 
 func _ready():
@@ -216,11 +216,11 @@ func refresh_model_list():
 	
 	model_request.request(url, headers, HTTPClient.METHOD_GET)
 
-func get_available_models() -> Array[Dictionary]:
+func get_available_models() -> Array:
 	"""Get list of available models with metadata"""
 	return available_models
 
-func get_recommended_models() -> Array[Dictionary]:
+func get_recommended_models() -> Array:
 	"""Get only recommended models for easier selection"""
 	var recommended = []
 	for model in available_models:
@@ -228,7 +228,7 @@ func get_recommended_models() -> Array[Dictionary]:
 			recommended.append(model)
 	return recommended
 
-func get_code_models() -> Array[Dictionary]:
+func get_code_models() -> Array:
 	"""Get models specialized for coding"""
 	var code_models = []
 	for model in available_models:

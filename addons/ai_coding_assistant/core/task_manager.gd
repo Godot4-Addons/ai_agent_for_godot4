@@ -13,10 +13,10 @@ signal task_cancelled(task: Dictionary)
 signal queue_updated()
 
 # Task queues
-var pending_tasks: Array[Dictionary] = []
-var active_tasks: Array[Dictionary] = []
-var completed_tasks: Array[Dictionary] = []
-var failed_tasks: Array[Dictionary] = []
+var pending_tasks: Array = []
+var active_tasks: Array = []
+var completed_tasks: Array = []
+var failed_tasks: Array = []
 
 # Enhanced Configuration
 var max_concurrent_tasks: int = 5  # Increased capacity
@@ -559,12 +559,16 @@ func _execute_task_with_monitoring(task: Dictionary):
 	if task_executors.has(task_type):
 		var executor = task_executors[task_type]
 
-		try:
-			# Execute with timeout monitoring
+		# Execute with error handling
+		if executor and executor.has_method("call"):
 			var result = await executor.call(task)
-			_handle_enhanced_task_completion(task, result)
-		except:
-			var error = "Task execution failed: " + str(get_stack())
+			if result != null:
+				_handle_enhanced_task_completion(task, result)
+			else:
+				var error = "Task execution returned null result"
+				_handle_enhanced_task_failure(task, error)
+		else:
+			var error = "Invalid executor for task type: " + task_type
 			_handle_enhanced_task_failure(task, error)
 	else:
 		var error = "No executor found for task type: " + task_type

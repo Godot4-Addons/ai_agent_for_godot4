@@ -21,9 +21,9 @@ var api_manager: AIApiManager
 
 # Agent state
 var current_goal: Dictionary = {}
-var active_tasks: Array[Dictionary] = []
+var active_tasks: Array = []
 var agent_mode: String = "idle"  # idle, working, monitoring, learning
-var decision_history: Array[Dictionary] = []
+var decision_history: Array = []
 var performance_metrics: Dictionary = {}
 
 # Enhanced Configuration
@@ -46,7 +46,7 @@ var decision_weights: Dictionary = {
 
 # Context and memory integration
 var context_manager: ContextManager
-var short_term_memory: Array[Dictionary] = []
+var short_term_memory: Array = []
 var pattern_recognition: Dictionary = {}
 var success_patterns: Dictionary = {}
 var failure_patterns: Dictionary = {}

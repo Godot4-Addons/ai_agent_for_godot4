@@ -10,7 +10,7 @@ signal context_compressed(original_size: int, compressed_size: int)
 signal memory_threshold_reached(current_size: int, max_size: int)
 
 # Context storage
-var conversation_history: Array[Dictionary] = []
+var conversation_history: Array = []
 var system_context: String = ""
 var project_context: Dictionary = {}
 var code_context: Dictionary = {}
@@ -34,7 +34,7 @@ var context_priorities: Dictionary = {
 }
 
 # Memory and learning
-var important_patterns: Array[Dictionary] = []
+var important_patterns: Array = []
 var frequent_topics: Dictionary = {}
 var user_preferences: Dictionary = {}
 
@@ -92,7 +92,7 @@ func add_message(role: String, content: String, message_type: String = "text", m
 	context_updated.emit(_get_context_info())
 	return message
 
-func get_context_for_ai(include_system: bool = true) -> Array[Dictionary]:
+func get_context_for_ai(include_system: bool = true) -> Array:
 	"""Get optimized context for AI API calls"""
 	var context = []
 	
