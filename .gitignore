@@ -48,7 +48,7 @@ exports/
 
 # Plugin development
 *.uid
-
+*.import
 # OS generated files
 .directory
 
@@ -99,3 +99,5 @@ saved_conversations/
 # Plugin specific
 ai_assistant_settings.cfg
 user_preferences.cfg
+Godot_v4*
+.godot

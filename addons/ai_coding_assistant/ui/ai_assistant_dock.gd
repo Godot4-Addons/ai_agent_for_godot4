@@ -22,13 +22,21 @@ var apply_button: Button
 var explain_button: Button
 var improve_button: Button
 
-# UI containers for better resizing
+# Modern UI containers
 var main_splitter: VSplitContainer
+var header_container: HBoxContainer
+var status_panel: Panel
+var ai_status_label: Label
+var connection_indicator: Panel
+var model_info_label: Label
+var settings_toggle_button: Button
 var settings_container: VBoxContainer
 var settings_content: VBoxContainer
 var chat_container: VBoxContainer
 var code_container: VBoxContainer
 var quick_actions_container: VBoxContainer
+var progress_bar: ProgressBar
+var typing_indicator: Label
 
 # AI Agent Components
 var agent_brain: AgentBrain
@@ -137,6 +145,16 @@ func set_agent_components(brain: AgentBrain, terminal: TerminalIntegration, task
 	_load_settings()
 	_setup_keyboard_shortcuts()
 
+	# Set default provider to Ollama after UI is ready
+	call_deferred("_set_default_provider")
+
+func _set_default_provider():
+	"""Set default provider to Ollama and trigger provider change"""
+	if provider_option:
+		provider_option.selected = 6  # Ollama is at index 6
+		_on_provider_changed(6)  # Trigger provider change
+		print("Default provider set to Ollama")
+
 func _setup_ui():
 	# Create main container with enhanced flexible sizing
 	var main_container = VBoxContainer.new()
@@ -144,6 +162,9 @@ func _setup_ui():
 	main_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	main_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(main_container)
+
+	# Create modern header section
+	_create_modern_header(main_container)
 
 	# Create settings section (collapsible)
 	_create_settings_section(main_container)
@@ -177,49 +198,197 @@ func _setup_ui():
 	# Create quick actions section (collapsible)
 	_create_quick_actions_section(main_container)
 
+func _create_modern_header(parent: Container):
+	"""Create a modern, professional header with AI status and controls"""
+	header_container = HBoxContainer.new()
+	header_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	# Create status panel with modern styling
+	status_panel = Panel.new()
+	status_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status_panel.custom_minimum_size = Vector2(0, 45)
+
+	# Add gradient background style
+	var style_box = StyleBoxFlat.new()
+	style_box.bg_color = Color(0.15, 0.15, 0.2, 0.9)  # Dark blue-gray
+	style_box.corner_radius_top_left = 8
+	style_box.corner_radius_top_right = 8
+	style_box.corner_radius_bottom_left = 8
+	style_box.corner_radius_bottom_right = 8
+	style_box.border_width_left = 2
+	style_box.border_width_right = 2
+	style_box.border_width_top = 2
+	style_box.border_width_bottom = 2
+	style_box.border_color = Color(0.3, 0.6, 1.0, 0.8)  # Blue accent
+	status_panel.add_theme_stylebox_override("panel", style_box)
+
+	# Create header content container
+	var header_content = HBoxContainer.new()
+	header_content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	header_content.add_theme_constant_override("separation", 10)
+
+	# AI Agent title with icon
+	var title_container = HBoxContainer.new()
+	var ai_icon = Label.new()
+	ai_icon.text = "🤖"
+	ai_icon.add_theme_font_size_override("font_size", 20)
+	title_container.add_child(ai_icon)
+
+	var title_label = Label.new()
+	title_label.text = "AI Agent"
+	title_label.add_theme_font_size_override("font_size", 16)
+	title_label.add_theme_color_override("font_color", Color.WHITE)
+	title_container.add_child(title_label)
+
+	header_content.add_child(title_container)
+
+	# Connection status indicator
+	connection_indicator = Panel.new()
+	connection_indicator.custom_minimum_size = Vector2(12, 12)
+	var indicator_style = StyleBoxFlat.new()
+	indicator_style.bg_color = Color.RED  # Will change based on connection
+	indicator_style.corner_radius_top_left = 6
+	indicator_style.corner_radius_top_right = 6
+	indicator_style.corner_radius_bottom_left = 6
+	indicator_style.corner_radius_bottom_right = 6
+	connection_indicator.add_theme_stylebox_override("panel", indicator_style)
+	header_content.add_child(connection_indicator)
+
+	# AI status label
+	ai_status_label = Label.new()
+	ai_status_label.text = "Initializing..."
+	ai_status_label.add_theme_font_size_override("font_size", 12)
+	ai_status_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+	header_content.add_child(ai_status_label)
+
+	# Spacer
+	var spacer = Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header_content.add_child(spacer)
+
+	# Model info label
+	model_info_label = Label.new()
+	model_info_label.text = "No Model"
+	model_info_label.add_theme_font_size_override("font_size", 11)
+	model_info_label.add_theme_color_override("font_color", Color(0.7, 0.9, 1.0))
+	header_content.add_child(model_info_label)
+
+	# Settings toggle button
+	settings_toggle_button = Button.new()
+	settings_toggle_button.text = "⚙️"
+	settings_toggle_button.custom_minimum_size = Vector2(30, 30)
+	settings_toggle_button.flat = true
+	settings_toggle_button.add_theme_font_size_override("font_size", 14)
+	settings_toggle_button.pressed.connect(_on_settings_toggle)
+	header_content.add_child(settings_toggle_button)
+
+	status_panel.add_child(header_content)
+	header_container.add_child(status_panel)
+
+	parent.add_child(header_container)
+
+	# Add progress bar for AI operations
+	progress_bar = ProgressBar.new()
+	progress_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	progress_bar.custom_minimum_size = Vector2(0, 4)
+	progress_bar.visible = false
+	progress_bar.modulate = Color(0.3, 0.6, 1.0)
+	parent.add_child(progress_bar)
+
 	# Apply responsive design after UI is created
 	call_deferred("_apply_responsive_design")
 
-func _create_settings_section(parent: Container):
-	settings_container = VBoxContainer.new()
+func _on_settings_toggle():
+	"""Toggle settings panel visibility"""
+	print("Settings toggle button pressed!")
+	if settings_container:
+		settings_container.visible = !settings_container.visible
+		settings_toggle_button.text = "⚙️" if not settings_container.visible else "✖️"
+		print("Settings panel visibility: ", settings_container.visible)
+	else:
+		print("Settings container not found!")
 
-	# Settings header with collapse button
-	var settings_header = HBoxContainer.new()
-	var collapse_button = Button.new()
-	collapse_button.text = "▼" if not settings_collapsed else "▶"
-	collapse_button.set_custom_minimum_size(Vector2(20, 20))
-	collapse_button.pressed.connect(_toggle_settings_collapse)
+func _create_settings_section(parent: Container):
+	# Modern settings panel - initially hidden
+	settings_container = VBoxContainer.new()
+	settings_container.visible = false  # Hidden by default, controlled by header toggle
+
+	# Modern settings panel with styling
+	var settings_panel = Panel.new()
+	settings_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	# Style the settings panel
+	var panel_style = StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.1, 0.12, 0.18, 0.95)
+	panel_style.corner_radius_top_left = 8
+	panel_style.corner_radius_top_right = 8
+	panel_style.corner_radius_bottom_left = 8
+	panel_style.corner_radius_bottom_right = 8
+	panel_style.border_width_left = 1
+	panel_style.border_width_right = 1
+	panel_style.border_width_top = 1
+	panel_style.border_width_bottom = 1
+	panel_style.border_color = Color(0.3, 0.6, 1.0, 0.3)
+	settings_panel.add_theme_stylebox_override("panel", panel_style)
+
+	var settings_content_container = VBoxContainer.new()
+	settings_content_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	settings_content_container.add_theme_constant_override("margin_left", 12)
+	settings_content_container.add_theme_constant_override("margin_right", 12)
+	settings_content_container.add_theme_constant_override("margin_top", 12)
+	settings_content_container.add_theme_constant_override("margin_bottom", 12)
+	settings_content_container.add_theme_constant_override("separation", 8)
+
+	# Modern settings header
+	var settings_header = Panel.new()
+	settings_header.custom_minimum_size = Vector2(0, 35)
+
+	var header_style = StyleBoxFlat.new()
+	header_style.bg_color = Color(0.15, 0.2, 0.3, 0.9)
+	header_style.corner_radius_top_left = 6
+	header_style.corner_radius_top_right = 6
+	settings_header.add_theme_stylebox_override("panel", header_style)
+
+	var header_content = HBoxContainer.new()
+	header_content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	header_content.add_theme_constant_override("margin_left", 10)
+	header_content.add_theme_constant_override("margin_right", 10)
+
+	var settings_icon = Label.new()
+	settings_icon.text = "⚙️"
+	settings_icon.add_theme_font_size_override("font_size", 16)
+	header_content.add_child(settings_icon)
 
 	var settings_label = Label.new()
-	settings_label.text = "API Settings"
-	settings_label.add_theme_font_size_override("font_size", 14)
+	settings_label.text = "AI Configuration"
+	settings_label.add_theme_font_size_override("font_size", 13)
+	settings_label.add_theme_color_override("font_color", Color.WHITE)
 	settings_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header_content.add_child(settings_label)
 
 	var help_button = Button.new()
-	help_button.text = "?"
-	help_button.set_custom_minimum_size(Vector2(25, 25))
+	help_button.text = "❓"
+	help_button.custom_minimum_size = Vector2(28, 28)
+	help_button.flat = true
+	help_button.add_theme_font_size_override("font_size", 12)
 	help_button.pressed.connect(_on_help_pressed)
+	header_content.add_child(help_button)
 
-	var settings_button = Button.new()
-	settings_button.text = "⚙"
-	settings_button.set_custom_minimum_size(Vector2(25, 25))
-	settings_button.pressed.connect(_on_settings_pressed)
+	settings_header.add_child(header_content)
+	settings_content_container.add_child(settings_header)
 
-	settings_header.add_child(collapse_button)
-	settings_header.add_child(settings_label)
-	settings_header.add_child(help_button)
-	settings_header.add_child(settings_button)
-	settings_container.add_child(settings_header)
-
-	# Settings content (collapsible)
+	# Modern settings content
 	settings_content = VBoxContainer.new()
-	settings_content.visible = not settings_collapsed
+	settings_content.add_theme_constant_override("separation", 10)
 
-	# Provider selection with better layout
-	var provider_hbox = HBoxContainer.new()
-	var provider_label = Label.new()
-	provider_label.text = "Provider:"
-	provider_label.custom_minimum_size = Vector2(60, 0)
+	# Provider selection section
+	var provider_section = VBoxContainer.new()
+	var provider_title = Label.new()
+	provider_title.text = "🌐 AI Provider"
+	provider_title.add_theme_font_size_override("font_size", 12)
+	provider_title.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
+	provider_section.add_child(provider_title)
+
 	provider_option = OptionButton.new()
 	provider_option.add_item("🤖 Gemini (Free)")
 	provider_option.add_item("🤗 Hugging Face (Free)")
@@ -228,38 +397,89 @@ func _create_settings_section(parent: Container):
 	provider_option.add_item("🎭 Anthropic")
 	provider_option.add_item("⚡ Groq")
 	provider_option.add_item("🏠 Ollama (Local)")
-	provider_option.selected = 0
+	provider_option.selected = 6  # Default to Ollama
 	provider_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	provider_option.custom_minimum_size = Vector2(0, 32)
 	provider_option.item_selected.connect(_on_provider_changed)
-	provider_hbox.add_child(provider_label)
-	provider_hbox.add_child(provider_option)
-	settings_content.add_child(provider_hbox)
 
-	# API Key input with better layout
-	var key_hbox = HBoxContainer.new()
-	var key_label = Label.new()
-	key_label.text = "API Key:"
-	key_label.custom_minimum_size = Vector2(60, 0)
+	# Style the provider option
+	var provider_style = StyleBoxFlat.new()
+	provider_style.bg_color = Color(0.08, 0.1, 0.15, 0.9)
+	provider_style.corner_radius_top_left = 6
+	provider_style.corner_radius_top_right = 6
+	provider_style.corner_radius_bottom_left = 6
+	provider_style.corner_radius_bottom_right = 6
+	provider_style.border_width_left = 1
+	provider_style.border_width_right = 1
+	provider_style.border_width_top = 1
+	provider_style.border_width_bottom = 1
+	provider_style.border_color = Color(0.3, 0.6, 1.0, 0.5)
+	provider_option.add_theme_stylebox_override("normal", provider_style)
+
+	provider_section.add_child(provider_option)
+	settings_content.add_child(provider_section)
+
+	# API Key section
+	var key_section = VBoxContainer.new()
+	var key_title = Label.new()
+	key_title.text = "🔑 Authentication"
+	key_title.add_theme_font_size_override("font_size", 12)
+	key_title.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
+	key_section.add_child(key_title)
+
 	api_key_field = LineEdit.new()
-	api_key_field.placeholder_text = "Enter your API key"
+	api_key_field.placeholder_text = "🔐 Enter your API key (not needed for Ollama)"
 	api_key_field.secret = true
 	api_key_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	api_key_field.custom_minimum_size = Vector2(0, 32)
 	api_key_field.text_changed.connect(_on_api_key_changed)
-	key_hbox.add_child(key_label)
-	key_hbox.add_child(api_key_field)
-	settings_content.add_child(key_hbox)
 
-	# Model selection dropdown
-	var model_hbox = HBoxContainer.new()
-	var model_label = Label.new()
-	model_label.text = "Model:"
-	model_label.custom_minimum_size = Vector2(60, 0)
+	# Style the API key field
+	var key_style = StyleBoxFlat.new()
+	key_style.bg_color = Color(0.08, 0.1, 0.15, 0.9)
+	key_style.corner_radius_top_left = 6
+	key_style.corner_radius_top_right = 6
+	key_style.corner_radius_bottom_left = 6
+	key_style.corner_radius_bottom_right = 6
+	key_style.border_width_left = 1
+	key_style.border_width_right = 1
+	key_style.border_width_top = 1
+	key_style.border_width_bottom = 1
+	key_style.border_color = Color(0.6, 0.3, 1.0, 0.5)
+	api_key_field.add_theme_stylebox_override("normal", key_style)
+
+	key_section.add_child(api_key_field)
+	settings_content.add_child(key_section)
+
+	# Model selection section
+	var model_section = VBoxContainer.new()
+	var model_title = Label.new()
+	model_title.text = "🧠 AI Model"
+	model_title.add_theme_font_size_override("font_size", 12)
+	model_title.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
+	model_section.add_child(model_title)
+
 	model_option = OptionButton.new()
 	model_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	model_option.custom_minimum_size = Vector2(0, 32)
 	model_option.item_selected.connect(_on_model_changed)
-	model_hbox.add_child(model_label)
-	model_hbox.add_child(model_option)
-	settings_content.add_child(model_hbox)
+
+	# Style the model option
+	var model_style = StyleBoxFlat.new()
+	model_style.bg_color = Color(0.08, 0.1, 0.15, 0.9)
+	model_style.corner_radius_top_left = 6
+	model_style.corner_radius_top_right = 6
+	model_style.corner_radius_bottom_left = 6
+	model_style.corner_radius_bottom_right = 6
+	model_style.border_width_left = 1
+	model_style.border_width_right = 1
+	model_style.border_width_top = 1
+	model_style.border_width_bottom = 1
+	model_style.border_color = Color(1.0, 0.6, 0.3, 0.5)
+	model_option.add_theme_stylebox_override("normal", model_style)
+
+	model_section.add_child(model_option)
+	settings_content.add_child(model_section)
 
 	# Initialize model dropdown
 	_update_model_dropdown()
@@ -267,7 +487,9 @@ func _create_settings_section(parent: Container):
 	# Ollama-specific controls (initially hidden)
 	_create_ollama_controls()
 
-	settings_container.add_child(settings_content)
+	settings_content_container.add_child(settings_content)
+	settings_panel.add_child(settings_content_container)
+	settings_container.add_child(settings_panel)
 	parent.add_child(settings_container)
 
 func _create_chat_section(parent: Container):
@@ -275,59 +497,110 @@ func _create_chat_section(parent: Container):
 	chat_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	chat_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
 
-	# Chat header with action buttons
-	var chat_header = HBoxContainer.new()
+	# Modern chat header with gradient background
+	var chat_header = Panel.new()
+	chat_header.custom_minimum_size = Vector2(0, 35)
+
+	# Style the header
+	var header_style = StyleBoxFlat.new()
+	header_style.bg_color = Color(0.2, 0.25, 0.3, 0.95)
+	header_style.corner_radius_top_left = 6
+	header_style.corner_radius_top_right = 6
+	header_style.border_width_bottom = 1
+	header_style.border_color = Color(0.4, 0.4, 0.5, 0.8)
+	chat_header.add_theme_stylebox_override("panel", header_style)
+
+	# Header content
+	var header_content = HBoxContainer.new()
+	header_content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	header_content.add_theme_constant_override("separation", 8)
+
+	# Chat icon and title
+	var chat_icon = Label.new()
+	chat_icon.text = "💬"
+	chat_icon.add_theme_font_size_override("font_size", 16)
+	header_content.add_child(chat_icon)
+
 	var chat_label = Label.new()
-	chat_label.text = "AI Chat"
-	chat_label.add_theme_font_size_override("font_size", 14)
+	chat_label.text = "AI Conversation"
+	chat_label.add_theme_font_size_override("font_size", 13)
+	chat_label.add_theme_color_override("font_color", Color.WHITE)
 	chat_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header_content.add_child(chat_label)
 
-	# Word wrap toggle button
+	# Typing indicator
+	typing_indicator = Label.new()
+	typing_indicator.text = "AI is typing..."
+	typing_indicator.add_theme_font_size_override("font_size", 10)
+	typing_indicator.add_theme_color_override("font_color", Color(0.7, 0.9, 1.0))
+	typing_indicator.visible = false
+	header_content.add_child(typing_indicator)
+
+	# Modern action buttons
 	chat_word_wrap_button = Button.new()
-	chat_word_wrap_button.text = "↩" if chat_word_wrap_enabled else "→"
+	chat_word_wrap_button.text = "↩"
 	chat_word_wrap_button.tooltip_text = "Toggle word wrap"
-	chat_word_wrap_button.set_custom_minimum_size(Vector2(25, 25))
+	chat_word_wrap_button.custom_minimum_size = Vector2(28, 28)
+	chat_word_wrap_button.flat = true
+	chat_word_wrap_button.add_theme_font_size_override("font_size", 12)
 	chat_word_wrap_button.pressed.connect(_on_toggle_chat_word_wrap)
+	header_content.add_child(chat_word_wrap_button)
 
-	# Clear chat button
 	chat_clear_button = Button.new()
 	chat_clear_button.text = "🗑"
 	chat_clear_button.tooltip_text = "Clear chat history"
-	chat_clear_button.set_custom_minimum_size(Vector2(25, 25))
+	chat_clear_button.custom_minimum_size = Vector2(28, 28)
+	chat_clear_button.flat = true
+	chat_clear_button.add_theme_font_size_override("font_size", 12)
 	chat_clear_button.pressed.connect(_on_clear_chat)
+	header_content.add_child(chat_clear_button)
 
-	chat_header.add_child(chat_label)
-	chat_header.add_child(chat_word_wrap_button)
-	chat_header.add_child(chat_clear_button)
+	chat_header.add_child(header_content)
 	chat_container.add_child(chat_header)
+
+	# Create modern chat area with custom styling
+	var chat_area = Panel.new()
+	chat_area.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	chat_area.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	# Style the chat area
+	var chat_style = StyleBoxFlat.new()
+	chat_style.bg_color = Color(0.08, 0.08, 0.12, 0.95)  # Dark background
+	chat_style.corner_radius_bottom_left = 6
+	chat_style.corner_radius_bottom_right = 6
+	chat_style.border_width_left = 1
+	chat_style.border_width_right = 1
+	chat_style.border_width_bottom = 1
+	chat_style.border_color = Color(0.3, 0.3, 0.4, 0.6)
+	chat_area.add_theme_stylebox_override("panel", chat_style)
 
 	# Create scrollable container for chat history
 	var chat_scroll = ScrollContainer.new()
-	chat_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	chat_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	chat_scroll.custom_minimum_size = Vector2(0, 150)  # Default minimum height
+	chat_scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	chat_scroll.add_theme_constant_override("margin_left", 8)
+	chat_scroll.add_theme_constant_override("margin_right", 8)
+	chat_scroll.add_theme_constant_override("margin_top", 8)
+	chat_scroll.add_theme_constant_override("margin_bottom", 8)
 
-	# Enable scrolling
+	# Enable scrolling with custom scrollbar styling
 	chat_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	chat_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	chat_scroll.follow_focus = true
 
-	# Chat history with enhanced markdown support and flexible sizing
+	# Modern chat history with enhanced styling
 	chat_history = RichTextLabel.new()
 	chat_history.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	chat_history.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	chat_history.bbcode_enabled = true
 	chat_history.scroll_following = true
-	chat_history.selection_enabled = true  # Enable text selection
-	chat_history.context_menu_enabled = true  # Enable built-in context menu
-
-	# Enhanced text properties for better readability
+	chat_history.selection_enabled = true
+	chat_history.context_menu_enabled = true
 	chat_history.fit_content = true
 	chat_history.scroll_active = true
 	chat_history.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
-	# Better font and styling
-	_setup_chat_styling()
+	# Enhanced chat styling
+	_setup_modern_chat_styling()
 
 	# Create context menu for chat
 	_create_chat_context_menu()
@@ -335,39 +608,123 @@ func _create_chat_section(parent: Container):
 
 	# Add chat history to scroll container
 	chat_scroll.add_child(chat_history)
-	chat_container.add_child(chat_scroll)
+	chat_area.add_child(chat_scroll)
+	chat_container.add_child(chat_area)
 
-	# Sticky footer: Input section with better layout
-	var input_footer = VBoxContainer.new()
-	input_footer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	input_footer.size_flags_vertical = Control.SIZE_SHRINK_END  # Stick to bottom
+	# Modern input section
+	var input_panel = Panel.new()
+	input_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	input_panel.custom_minimum_size = Vector2(0, 50)
 
-	# Add a subtle separator above input
-	var input_separator = HSeparator.new()
-	input_separator.add_theme_constant_override("separation", 1)
-	input_footer.add_child(input_separator)
+	# Style the input panel
+	var input_style = StyleBoxFlat.new()
+	input_style.bg_color = Color(0.15, 0.18, 0.22, 0.95)
+	input_style.corner_radius_bottom_left = 6
+	input_style.corner_radius_bottom_right = 6
+	input_style.border_width_top = 1
+	input_style.border_color = Color(0.4, 0.4, 0.5, 0.8)
+	input_panel.add_theme_stylebox_override("panel", input_style)
 
-	var input_hbox = HBoxContainer.new()
-	input_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var input_container = HBoxContainer.new()
+	input_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	input_container.add_theme_constant_override("margin_left", 10)
+	input_container.add_theme_constant_override("margin_right", 10)
+	input_container.add_theme_constant_override("margin_top", 8)
+	input_container.add_theme_constant_override("margin_bottom", 8)
+	input_container.add_theme_constant_override("separation", 8)
 
+	# Modern input field
 	input_field = LineEdit.new()
-	input_field.placeholder_text = "Ask me anything about coding..."
+	input_field.placeholder_text = "💭 Ask me anything about coding..."
 	input_field.editable = true
 	input_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	input_field.custom_minimum_size = Vector2(0, 34)
 	input_field.text_submitted.connect(_on_send_message)
 
+	# Style the input field
+	var input_field_style = StyleBoxFlat.new()
+	input_field_style.bg_color = Color(0.1, 0.1, 0.15, 0.9)
+	input_field_style.corner_radius_top_left = 17
+	input_field_style.corner_radius_top_right = 17
+	input_field_style.corner_radius_bottom_left = 17
+	input_field_style.corner_radius_bottom_right = 17
+	input_field_style.border_width_left = 1
+	input_field_style.border_width_right = 1
+	input_field_style.border_width_top = 1
+	input_field_style.border_width_bottom = 1
+	input_field_style.border_color = Color(0.3, 0.6, 1.0, 0.6)
+	input_field.add_theme_stylebox_override("normal", input_field_style)
+	input_field.add_theme_stylebox_override("focus", input_field_style)
+
+	# Modern send button
 	send_button = Button.new()
-	send_button.text = "Send"
-	send_button.custom_minimum_size = Vector2(60, 0)
+	send_button.text = "🚀"
+	send_button.custom_minimum_size = Vector2(40, 34)
 	send_button.pressed.connect(_on_send_pressed)
 
-	input_hbox.add_child(input_field)
-	input_hbox.add_child(send_button)
-	input_footer.add_child(input_hbox)
+	# Style the send button
+	var send_style = StyleBoxFlat.new()
+	send_style.bg_color = Color(0.2, 0.6, 1.0, 0.9)
+	send_style.corner_radius_top_left = 17
+	send_style.corner_radius_top_right = 17
+	send_style.corner_radius_bottom_left = 17
+	send_style.corner_radius_bottom_right = 17
+	send_button.add_theme_stylebox_override("normal", send_style)
+	send_button.add_theme_stylebox_override("hover", send_style)
+	send_button.add_theme_stylebox_override("pressed", send_style)
+	send_button.add_theme_font_size_override("font_size", 14)
 
-	chat_container.add_child(input_footer)
+	input_container.add_child(input_field)
+	input_container.add_child(send_button)
+	input_panel.add_child(input_container)
+	chat_container.add_child(input_panel)
 
 	parent.add_child(chat_container)
+
+func _setup_modern_chat_styling():
+	"""Setup modern styling for chat history"""
+	# Set background color
+	chat_history.add_theme_color_override("default_color", Color(0.9, 0.9, 0.95))
+	chat_history.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.3))
+
+	# Custom font sizes for different elements
+	chat_history.add_theme_font_size_override("normal_font_size", 13)
+	chat_history.add_theme_font_size_override("bold_font_size", 14)
+	chat_history.add_theme_font_size_override("mono_font_size", 12)
+
+func _update_ai_status(status: String, color: Color = Color.WHITE):
+	"""Update AI status in the header"""
+	if ai_status_label:
+		ai_status_label.text = status
+		ai_status_label.add_theme_color_override("font_color", color)
+
+func _update_connection_status(connected: bool):
+	"""Update connection indicator"""
+	if connection_indicator:
+		var indicator_style = StyleBoxFlat.new()
+		indicator_style.bg_color = Color.GREEN if connected else Color.RED
+		indicator_style.corner_radius_top_left = 6
+		indicator_style.corner_radius_top_right = 6
+		indicator_style.corner_radius_bottom_left = 6
+		indicator_style.corner_radius_bottom_right = 6
+		connection_indicator.add_theme_stylebox_override("panel", indicator_style)
+
+func _update_model_info(model_name: String):
+	"""Update model information display"""
+	if model_info_label:
+		model_info_label.text = model_name if not model_name.is_empty() else "No Model"
+
+func _show_typing_indicator(show: bool = true):
+	"""Show/hide typing indicator"""
+	if typing_indicator:
+		typing_indicator.visible = show
+
+func _show_progress(show: bool = true, value: float = 0.0):
+	"""Show/hide progress bar with optional value"""
+	if progress_bar:
+		progress_bar.visible = show
+		if show:
+			progress_bar.value = value
 
 func _create_code_section(parent: Container):
 	code_container = VBoxContainer.new()
@@ -474,64 +831,120 @@ func _create_code_section(parent: Container):
 	parent.add_child(code_container)
 
 func _create_quick_actions_section(parent: Container):
-	quick_actions_container = VBoxContainer.new()
+	# Modern quick actions panel
+	var actions_panel = Panel.new()
+	actions_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-	# Quick actions header with collapse button
-	var quick_header = HBoxContainer.new()
-	var collapse_button = Button.new()
-	collapse_button.text = "▼" if not quick_actions_collapsed else "▶"
-	collapse_button.custom_minimum_size = Vector2(20, 20)
-	collapse_button.pressed.connect(_toggle_quick_actions_collapse)
+	# Style the actions panel
+	var panel_style = StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.12, 0.15, 0.2, 0.95)
+	panel_style.corner_radius_top_left = 8
+	panel_style.corner_radius_top_right = 8
+	panel_style.corner_radius_bottom_left = 8
+	panel_style.corner_radius_bottom_right = 8
+	panel_style.border_width_left = 1
+	panel_style.border_width_right = 1
+	panel_style.border_width_top = 1
+	panel_style.border_width_bottom = 1
+	panel_style.border_color = Color(0.3, 0.6, 1.0, 0.4)
+	actions_panel.add_theme_stylebox_override("panel", panel_style)
+
+	quick_actions_container = VBoxContainer.new()
+	quick_actions_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	quick_actions_container.add_theme_constant_override("margin_left", 8)
+	quick_actions_container.add_theme_constant_override("margin_right", 8)
+	quick_actions_container.add_theme_constant_override("margin_top", 8)
+	quick_actions_container.add_theme_constant_override("margin_bottom", 8)
+
+	# Modern header with gradient
+	var quick_header = Panel.new()
+	quick_header.custom_minimum_size = Vector2(0, 32)
+
+	var header_style = StyleBoxFlat.new()
+	header_style.bg_color = Color(0.2, 0.25, 0.35, 0.9)
+	header_style.corner_radius_top_left = 6
+	header_style.corner_radius_top_right = 6
+	quick_header.add_theme_stylebox_override("panel", header_style)
+
+	var header_content = HBoxContainer.new()
+	header_content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	header_content.add_theme_constant_override("margin_left", 8)
+	header_content.add_theme_constant_override("margin_right", 8)
+
+	var quick_icon = Label.new()
+	quick_icon.text = "⚡"
+	quick_icon.add_theme_font_size_override("font_size", 16)
+	header_content.add_child(quick_icon)
 
 	var quick_label = Label.new()
 	quick_label.text = "Quick Actions"
-	quick_label.add_theme_font_size_override("font_size", 14)
+	quick_label.add_theme_font_size_override("font_size", 13)
+	quick_label.add_theme_color_override("font_color", Color.WHITE)
 	quick_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header_content.add_child(quick_label)
 
-	quick_header.add_child(collapse_button)
-	quick_header.add_child(quick_label)
+	var collapse_button = Button.new()
+	collapse_button.text = "▼" if not quick_actions_collapsed else "▶"
+	collapse_button.custom_minimum_size = Vector2(24, 24)
+	collapse_button.flat = true
+	collapse_button.add_theme_font_size_override("font_size", 10)
+	collapse_button.pressed.connect(_toggle_quick_actions_collapse)
+	header_content.add_child(collapse_button)
+
+	quick_header.add_child(header_content)
 	quick_actions_container.add_child(quick_header)
 
-	# Quick actions content (collapsible)
+	# Modern quick actions content (collapsible)
 	quick_content = VBoxContainer.new()
 	quick_content.visible = not quick_actions_collapsed
+	quick_content.add_theme_constant_override("separation", 4)
 
-	var gen_player_btn = Button.new()
-	gen_player_btn.text = "🏃 Player Movement"
-	gen_player_btn.pressed.connect(_on_generate_class)
-	gen_player_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Create action buttons in a grid layout
+	var actions_grid = GridContainer.new()
+	actions_grid.columns = 2
+	actions_grid.add_theme_constant_override("h_separation", 6)
+	actions_grid.add_theme_constant_override("v_separation", 6)
 
-	var gen_singleton_btn = Button.new()
-	gen_singleton_btn.text = "⚙️ Singleton"
-	gen_singleton_btn.pressed.connect(_on_generate_singleton)
-	gen_singleton_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Define action buttons with modern styling
+	var actions = [
+		{"text": "🏃 Player", "callback": "_on_generate_class", "color": Color(0.2, 0.8, 0.4)},
+		{"text": "⚙️ Singleton", "callback": "_on_generate_singleton", "color": Color(0.8, 0.4, 0.2)},
+		{"text": "🖥️ UI System", "callback": "_on_generate_ui", "color": Color(0.4, 0.6, 0.9)},
+		{"text": "💾 Save Data", "callback": "_on_generate_save_system", "color": Color(0.9, 0.6, 0.2)},
+		{"text": "🔊 Audio", "callback": "_on_generate_audio_manager", "color": Color(0.8, 0.2, 0.8)},
+		{"text": "🔄 State", "callback": "_on_generate_state_machine", "color": Color(0.2, 0.8, 0.8)}
+	]
 
-	var gen_ui_btn = Button.new()
-	gen_ui_btn.text = "🖥️ UI Controller"
-	gen_ui_btn.pressed.connect(_on_generate_ui)
-	gen_ui_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for action in actions:
+		var btn = Button.new()
+		btn.text = action.text
+		btn.custom_minimum_size = Vector2(0, 32)
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.pressed.connect(Callable(self, action.callback))
 
-	var gen_save_btn = Button.new()
-	gen_save_btn.text = "💾 Save System"
-	gen_save_btn.pressed.connect(_on_generate_save_system)
-	gen_save_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		# Modern button styling
+		var btn_style = StyleBoxFlat.new()
+		btn_style.bg_color = action.color
+		btn_style.corner_radius_top_left = 6
+		btn_style.corner_radius_top_right = 6
+		btn_style.corner_radius_bottom_left = 6
+		btn_style.corner_radius_bottom_right = 6
+		btn.add_theme_stylebox_override("normal", btn_style)
 
-	var gen_audio_btn = Button.new()
-	gen_audio_btn.text = "🔊 Audio Manager"
-	gen_audio_btn.pressed.connect(_on_generate_audio_manager)
-	gen_audio_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var btn_hover_style = StyleBoxFlat.new()
+		btn_hover_style.bg_color = action.color * 1.2
+		btn_hover_style.corner_radius_top_left = 6
+		btn_hover_style.corner_radius_top_right = 6
+		btn_hover_style.corner_radius_bottom_left = 6
+		btn_hover_style.corner_radius_bottom_right = 6
+		btn.add_theme_stylebox_override("hover", btn_hover_style)
 
-	var gen_state_btn = Button.new()
-	gen_state_btn.text = "🔄 State Machine"
-	gen_state_btn.pressed.connect(_on_generate_state_machine)
-	gen_state_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.add_theme_font_size_override("font_size", 11)
+		btn.add_theme_color_override("font_color", Color.WHITE)
 
-	quick_content.add_child(gen_player_btn)
-	quick_content.add_child(gen_singleton_btn)
-	quick_content.add_child(gen_ui_btn)
-	quick_content.add_child(gen_save_btn)
-	quick_content.add_child(gen_audio_btn)
-	quick_content.add_child(gen_state_btn)
+		actions_grid.add_child(btn)
+
+	quick_content.add_child(actions_grid)
 
 	# Ollama-specific quick actions (initially hidden)
 	_create_ollama_quick_actions()
@@ -540,7 +953,8 @@ func _create_quick_actions_section(parent: Container):
 	_create_editor_quick_actions()
 
 	quick_actions_container.add_child(quick_content)
-	parent.add_child(quick_actions_container)
+	actions_panel.add_child(quick_actions_container)
+	parent.add_child(actions_panel)
 
 # Styling setup functions
 func _setup_chat_styling():
@@ -737,12 +1151,19 @@ func _refresh_settings_section():
 
 func _refresh_quick_actions_section():
 	if quick_actions_container:
-		var header = quick_actions_container.get_child(0) as HBoxContainer
-		var collapse_button = header.get_child(0) as Button
-		collapse_button.text = "▼" if not quick_actions_collapsed else "▶"
+		# Find the collapse button in the header structure
+		var header_panel = quick_actions_container.get_child(0) as Panel
+		if header_panel:
+			var header_content = header_panel.get_child(0) as HBoxContainer
+			if header_content and header_content.get_child_count() > 2:
+				var collapse_button = header_content.get_child(2) as Button
+				if collapse_button:
+					collapse_button.text = "▼" if not quick_actions_collapsed else "▶"
 
-		var content = quick_actions_container.get_child(1)
-		content.visible = not quick_actions_collapsed
+		# Toggle content visibility
+		if quick_actions_container.get_child_count() > 1:
+			var content = quick_actions_container.get_child(1)
+			content.visible = not quick_actions_collapsed
 
 # Context menu action handlers
 func _on_chat_context_menu_pressed(id: int):
@@ -865,10 +1286,18 @@ func _on_toggle_code_line_numbers():
 func _on_provider_changed(index: int):
 	var providers = ["gemini", "huggingface", "cohere", "openai", "anthropic", "groq", "ollama"]
 	if index < providers.size():
+		var provider = providers[index]
 		if api_manager and api_manager.has_method("set_provider"):
-			api_manager.set_provider(providers[index])
-		_update_provider_info(providers[index])
+			api_manager.set_provider(provider)
+		_update_provider_info(provider)
 		_update_model_dropdown()
+
+		# Update status based on provider
+		if provider == "ollama":
+			_update_connection_status(true)  # Will be updated by actual status check
+			_update_ai_status("Connecting to Ollama...", Color.YELLOW)
+		else:
+			_update_ai_status("Ready", Color.GREEN)
 
 func _update_provider_info(provider: String):
 	"""Update UI based on selected provider"""
@@ -903,11 +1332,55 @@ func _update_provider_info(provider: String):
 		ollama_controls.visible = (provider == "ollama")
 		if provider == "ollama":
 			_add_to_chat("System", "🏠 Ollama selected - Advanced local AI features available", Color.CYAN)
+			_check_ollama_status()
 
 	# Show/hide Ollama quick actions
 	for action in ollama_quick_actions:
 		if action:
 			action.visible = (provider == "ollama")
+
+func _check_ollama_status():
+	"""Check if Ollama is running and available"""
+	var http_request = HTTPRequest.new()
+	add_child(http_request)
+	http_request.request_completed.connect(_on_ollama_status_checked)
+
+	var url = "http://localhost:11434/api/tags"
+	var headers = ["Content-Type: application/json"]
+	var error = http_request.request(url, headers, HTTPClient.METHOD_GET)
+
+	if error != OK:
+		_add_to_chat("System", "❌ Failed to check Ollama status", Color.RED)
+		http_request.queue_free()
+
+func _on_ollama_status_checked(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
+	var http_request = get_children().filter(func(child): return child is HTTPRequest).back()
+	if http_request:
+		http_request.queue_free()
+
+	if response_code == 200:
+		var json = JSON.new()
+		var parse_result = json.parse(body.get_string_from_utf8())
+		if parse_result == OK:
+			var data = json.data
+			if data.has("models") and data.models.size() > 0:
+				var model_count = data.models.size()
+				_add_to_chat("System", "✅ Ollama is running with " + str(model_count) + " model(s) available", Color.GREEN)
+				_update_model_dropdown()
+				_update_connection_status(true)
+				_update_ai_status("Connected to Ollama", Color.GREEN)
+			else:
+				_add_to_chat("System", "⚠️ Ollama is running but no models are installed", Color.YELLOW)
+				_update_connection_status(true)
+				_update_ai_status("No models available", Color.YELLOW)
+		else:
+			_add_to_chat("System", "⚠️ Ollama is running but returned invalid data", Color.YELLOW)
+			_update_connection_status(false)
+			_update_ai_status("Connection error", Color.YELLOW)
+	else:
+		_add_to_chat("System", "❌ Ollama is not available (Error: " + str(response_code) + ")", Color.RED)
+		_update_connection_status(false)
+		_update_ai_status("Disconnected", Color.RED)
 
 func _update_model_dropdown():
 	"""Update model dropdown based on current provider"""
@@ -928,68 +1401,158 @@ func _update_model_dropdown():
 
 	if models.size() > 0:
 		model_option.selected = 0
+		_update_model_info(models[0])
 
 func _on_model_changed(index: int):
 	"""Handle model selection change"""
 	api_manager.set_model_index(index)
+	var models = api_manager.get_available_models() if api_manager else []
+	if index < models.size():
+		_update_model_info(models[index])
 
 func _create_ollama_controls():
-	"""Create Ollama-specific controls"""
+	"""Create modern Ollama-specific controls"""
 	ollama_controls = VBoxContainer.new()
 	ollama_controls.visible = false  # Hidden by default
+	ollama_controls.add_theme_constant_override("separation", 8)
 
-	# Ollama server URL
-	var url_hbox = HBoxContainer.new()
+	# Ollama configuration section
+	var ollama_section = VBoxContainer.new()
+	var ollama_title = Label.new()
+	ollama_title.text = "🦙 Ollama Configuration"
+	ollama_title.add_theme_font_size_override("font_size", 12)
+	ollama_title.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
+	ollama_section.add_child(ollama_title)
+
+	# Server URL with modern styling
 	var url_label = Label.new()
 	url_label.text = "Server URL:"
-	url_label.custom_minimum_size = Vector2(80, 0)
+	url_label.add_theme_font_size_override("font_size", 10)
+	url_label.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9))
+	ollama_section.add_child(url_label)
+
 	ollama_url_field = LineEdit.new()
 	ollama_url_field.text = "http://localhost:11434"
-	ollama_url_field.placeholder_text = "Ollama server URL"
+	ollama_url_field.placeholder_text = "🌐 Ollama server URL"
 	ollama_url_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ollama_url_field.custom_minimum_size = Vector2(0, 28)
 	ollama_url_field.text_changed.connect(_on_ollama_url_changed)
-	url_hbox.add_child(url_label)
-	url_hbox.add_child(ollama_url_field)
-	ollama_controls.add_child(url_hbox)
 
-	# Streaming toggle
+	# Style the URL field
+	var url_style = StyleBoxFlat.new()
+	url_style.bg_color = Color(0.05, 0.08, 0.12, 0.9)
+	url_style.corner_radius_top_left = 4
+	url_style.corner_radius_top_right = 4
+	url_style.corner_radius_bottom_left = 4
+	url_style.corner_radius_bottom_right = 4
+	url_style.border_width_left = 1
+	url_style.border_width_right = 1
+	url_style.border_width_top = 1
+	url_style.border_width_bottom = 1
+	url_style.border_color = Color(0.3, 0.8, 0.6, 0.5)
+	ollama_url_field.add_theme_stylebox_override("normal", url_style)
+
+	ollama_section.add_child(ollama_url_field)
+	ollama_controls.add_child(ollama_section)
+
+	# Advanced settings section
+	var advanced_section = VBoxContainer.new()
+	var advanced_title = Label.new()
+	advanced_title.text = "⚙️ Advanced Settings"
+	advanced_title.add_theme_font_size_override("font_size", 12)
+	advanced_title.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
+	advanced_section.add_child(advanced_title)
+
+	# Streaming toggle with modern styling
 	ollama_streaming_check = CheckBox.new()
-	ollama_streaming_check.text = "Enable Streaming"
+	ollama_streaming_check.text = "🌊 Enable Streaming Responses"
+	ollama_streaming_check.button_pressed = true
+	ollama_streaming_check.add_theme_font_size_override("font_size", 11)
+	ollama_streaming_check.add_theme_color_override("font_color", Color(0.9, 0.9, 0.95))
 	ollama_streaming_check.toggled.connect(_on_ollama_streaming_toggled)
-	ollama_controls.add_child(ollama_streaming_check)
+	advanced_section.add_child(ollama_streaming_check)
 
-	# Temperature slider
-	var temp_hbox = HBoxContainer.new()
+	# Temperature control with modern design
+	var temp_container = VBoxContainer.new()
+	var temp_header = HBoxContainer.new()
 	var temp_label = Label.new()
-	temp_label.text = "Temperature:"
-	temp_label.custom_minimum_size = Vector2(80, 0)
+	temp_label.text = "🌡️ Temperature:"
+	temp_label.add_theme_font_size_override("font_size", 10)
+	temp_label.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9))
+	temp_header.add_child(temp_label)
+
+	var temp_value_label = Label.new()
+	temp_value_label.text = "0.7"
+	temp_value_label.add_theme_font_size_override("font_size", 10)
+	temp_value_label.add_theme_color_override("font_color", Color(1.0, 0.8, 0.4))
+	temp_value_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	temp_value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	temp_header.add_child(temp_value_label)
+	temp_container.add_child(temp_header)
+
 	ollama_temperature_slider = HSlider.new()
 	ollama_temperature_slider.min_value = 0.0
 	ollama_temperature_slider.max_value = 1.0
 	ollama_temperature_slider.step = 0.1
 	ollama_temperature_slider.value = 0.7
 	ollama_temperature_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ollama_temperature_slider.custom_minimum_size = Vector2(0, 20)
 	ollama_temperature_slider.value_changed.connect(_on_ollama_temperature_changed)
-	var temp_value_label = Label.new()
-	temp_value_label.text = "0.7"
-	temp_value_label.custom_minimum_size = Vector2(30, 0)
 	ollama_temperature_slider.value_changed.connect(func(value): temp_value_label.text = "%.1f" % value)
-	temp_hbox.add_child(temp_label)
-	temp_hbox.add_child(ollama_temperature_slider)
-	temp_hbox.add_child(temp_value_label)
-	ollama_controls.add_child(temp_hbox)
+	temp_container.add_child(ollama_temperature_slider)
 
-	# Model management
-	var model_mgmt_hbox = HBoxContainer.new()
+	advanced_section.add_child(temp_container)
+	ollama_controls.add_child(advanced_section)
+
+	# Model management section
+	var mgmt_section = VBoxContainer.new()
+	var mgmt_title = Label.new()
+	mgmt_title.text = "📦 Model Management"
+	mgmt_title.add_theme_font_size_override("font_size", 12)
+	mgmt_title.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
+	mgmt_section.add_child(mgmt_title)
+
+	var model_mgmt_grid = GridContainer.new()
+	model_mgmt_grid.columns = 2
+	model_mgmt_grid.add_theme_constant_override("h_separation", 6)
+	model_mgmt_grid.add_theme_constant_override("v_separation", 4)
+
+	# Pull model button
 	ollama_pull_button = Button.new()
-	ollama_pull_button.text = "Pull Model"
+	ollama_pull_button.text = "📥 Pull Model"
+	ollama_pull_button.custom_minimum_size = Vector2(0, 28)
+	ollama_pull_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	ollama_pull_button.pressed.connect(_on_ollama_pull_model)
+
+	# Style pull button
+	var pull_style = StyleBoxFlat.new()
+	pull_style.bg_color = Color(0.2, 0.6, 0.8, 0.9)
+	pull_style.corner_radius_top_left = 4
+	pull_style.corner_radius_top_right = 4
+	pull_style.corner_radius_bottom_left = 4
+	pull_style.corner_radius_bottom_right = 4
+	ollama_pull_button.add_theme_stylebox_override("normal", pull_style)
+
+	# Refresh models button
 	var refresh_button = Button.new()
-	refresh_button.text = "Refresh Models"
+	refresh_button.text = "🔄 Refresh"
+	refresh_button.custom_minimum_size = Vector2(0, 28)
+	refresh_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	refresh_button.pressed.connect(_on_ollama_refresh_models)
-	model_mgmt_hbox.add_child(ollama_pull_button)
-	model_mgmt_hbox.add_child(refresh_button)
-	ollama_controls.add_child(model_mgmt_hbox)
+
+	# Style refresh button
+	var refresh_style = StyleBoxFlat.new()
+	refresh_style.bg_color = Color(0.6, 0.8, 0.2, 0.9)
+	refresh_style.corner_radius_top_left = 4
+	refresh_style.corner_radius_top_right = 4
+	refresh_style.corner_radius_bottom_left = 4
+	refresh_style.corner_radius_bottom_right = 4
+	refresh_button.add_theme_stylebox_override("normal", refresh_style)
+
+	model_mgmt_grid.add_child(ollama_pull_button)
+	model_mgmt_grid.add_child(refresh_button)
+	mgmt_section.add_child(model_mgmt_grid)
+	ollama_controls.add_child(mgmt_section)
 
 	# Add to settings content
 	settings_content.add_child(ollama_controls)
@@ -1521,6 +2084,11 @@ func _on_send_message(message: String):
 	input_field.clear()
 	send_button.disabled = true
 
+	# Update UI status
+	_show_typing_indicator(true)
+	_update_ai_status("Processing...", Color.YELLOW)
+	_show_progress(true, 0.0)
+
 	# Check if this is a code generation request
 	if "generate" in message.to_lower() or "create" in message.to_lower() or "write" in message.to_lower():
 		api_manager.generate_code(message)
@@ -1601,6 +2169,11 @@ func _on_generate_state_machine():
 func _on_response_received(response: String):
 	send_button.disabled = false
 	_add_to_chat("AI", response, Color.GREEN)
+
+	# Update UI status
+	_show_typing_indicator(false)
+	_update_ai_status("Ready", Color.GREEN)
+	_show_progress(false)
 
 	# Handle different editor operation modes
 	if insert_at_cursor_mode:
@@ -1684,9 +2257,14 @@ func _handle_function_replacement_response(response: String):
 	else:
 		_add_to_chat("System", "❌ No code found in response", Color.RED)
 
-func _on_error_occurred(error: String):
+func _on_error_occurred(error: String, request_id: String = ""):
 	send_button.disabled = false
 	_add_to_chat("Error", error, Color.RED)
+
+	# Update UI status
+	_show_typing_indicator(false)
+	_update_ai_status("Error", Color.RED)
+	_show_progress(false)
 
 func _add_chat_message(message: String, sender: String = "Agent"):
 	"""Add a chat message with appropriate color based on sender"""
@@ -1709,16 +2287,41 @@ func _add_to_chat(sender: String, message: String, color: Color):
 	var color_hex = "#" + color.to_html(false)
 	var formatted_message = _format_message_with_markdown(message)
 
-	# Enhanced formatting with better visual separation
+	# Modern message formatting with better visual design
 	var datetime_parts = Time.get_datetime_string_from_system().split(" ")
 	var timestamp = ""
 	if datetime_parts.size() >= 2:
 		timestamp = datetime_parts[1].substr(0, 5)  # HH:MM format
 	else:
 		timestamp = Time.get_time_string_from_system().substr(0, 5)  # Fallback to time only
-	var sender_text = "[color=" + color_hex + "][b]" + sender + "[/b][/color] [color=#888888][" + timestamp + "][/color]"
 
-	chat_history.append_text(sender_text + "\n" + formatted_message + "\n\n")
+	# Enhanced sender formatting with icons and modern styling
+	var sender_icon = ""
+	var sender_color = color_hex
+	match sender:
+		"You":
+			sender_icon = "👤"
+			sender_color = "#4FC3F7"  # Light blue
+		"AI":
+			sender_icon = "🤖"
+			sender_color = "#66BB6A"  # Light green
+		"System":
+			sender_icon = "⚙️"
+			sender_color = "#FFA726"  # Orange
+		"Error":
+			sender_icon = "❌"
+			sender_color = "#EF5350"  # Red
+		_:
+			sender_icon = "💬"
+
+	# Create modern message bubble effect
+	var message_header = "[color=" + sender_color + "][b]" + sender_icon + " " + sender + "[/b][/color] [color=#666666][" + timestamp + "][/color]"
+	var message_body = "[color=#E0E0E0]" + formatted_message + "[/color]"
+
+	# Add message with modern spacing and visual separation
+	chat_history.append_text(message_header + "\n")
+	chat_history.append_text(message_body + "\n")
+	chat_history.append_text("[color=#333333]────────────────────────────────[/color]\n\n")
 
 func _format_message_with_markdown(message: String) -> String:
 	# Enhanced markdown formatting with error handling
@@ -2071,8 +2674,8 @@ func _on_settings_changed(settings: Dictionary):
 	api_manager.set_provider(settings.get("provider", "gemini"))
 
 	# Update UI to reflect changes
-	var providers = ["gemini", "huggingface", "cohere"]
-	var provider_index = providers.find(settings.get("provider", "gemini"))
+	var providers = ["gemini", "huggingface", "cohere", "openai", "anthropic", "groq", "ollama"]
+	var provider_index = providers.find(settings.get("provider", "ollama"))  # Default to Ollama
 	if provider_index >= 0:
 		provider_option.selected = provider_index
 
@@ -2116,7 +2719,7 @@ func _load_settings():
 		# Update UI
 		if api_key_field:
 			api_key_field.text = api_key
-		var providers = ["gemini", "huggingface", "cohere"]
+		var providers = ["gemini", "huggingface", "cohere", "openai", "anthropic", "groq", "ollama"]
 		var provider_index = providers.find(provider)
 		if provider_index >= 0 and provider_option:
 			provider_option.selected = provider_index

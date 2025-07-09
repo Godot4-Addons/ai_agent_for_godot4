@@ -204,10 +204,13 @@ func check_ollama_status() -> bool:
 	"""Check if Ollama is running and accessible"""
 	var url = base_url + "/api/tags"
 	var headers = ["Content-Type: application/json"]
-	
+
 	print("Checking Ollama status at: ", url)
 	model_request.request(url, headers, HTTPClient.METHOD_GET)
-	return true
+
+	# Set a timer to check connection status
+	await get_tree().create_timer(2.0).timeout
+	return is_connected
 
 func refresh_model_list():
 	"""Refresh the list of available models from Ollama"""
@@ -339,12 +342,16 @@ func send_chat_message(message: String, use_context: bool = true, request_id: St
 	"""Enhanced chat message with request tracking and better error handling"""
 	var actual_request_id = request_id if not request_id.is_empty() else _generate_request_id()
 
-	# Check connection first
+	# Check connection first - try to connect if not connected
 	if not is_connected:
 		check_ollama_status()
-		if not is_connected:
-			error_occurred.emit("Ollama is not available", actual_request_id)
-			return actual_request_id
+		# Give it a moment to check
+		await get_tree().create_timer(1.0).timeout
+
+	# If still not connected, try anyway (maybe status check failed but service is running)
+	if not is_connected:
+		print("Warning: Ollama connection status unknown, attempting request anyway...")
+		is_connected = true  # Assume it's working and let the actual request fail if needed
 
 	# Check if model is available
 	if not _is_model_available(current_model):
@@ -582,6 +589,7 @@ func _on_model_request_completed(result: int, response_code: int, headers: Packe
 	print("Ollama model request completed - Result: ", result, " Response code: ", response_code)
 
 	if response_code != 200:
+		is_connected = false
 		if response_code == 404:
 			error_occurred.emit("Ollama server not found - is it running on " + base_url + "?", "")
 		else:
@@ -604,6 +612,17 @@ func _on_model_request_completed(result: int, response_code: int, headers: Packe
 		for model in models:
 			model_names.append(model.get("name", "unknown"))
 		print("Available Ollama models: ", model_names)
+
+		# Update connection status
+		is_connected = true
+		available_models.clear()
+		for model in models:
+			available_models.append({
+				"name": model.get("name", "unknown"),
+				"size": model.get("size", 0),
+				"modified_at": model.get("modified_at", "")
+			})
+
 		model_list_updated.emit(models)
 
 	# Handle model info response
