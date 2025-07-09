@@ -10,12 +10,40 @@ var send_button: Button
 var provider_option: OptionButton
 var model_option: OptionButton
 var api_key_field: LineEdit
+# Provider-specific controls containers
+var provider_specific_container: VBoxContainer
 var ollama_controls: VBoxContainer
+var openai_controls: VBoxContainer
+var gemini_controls: VBoxContainer
+var anthropic_controls: VBoxContainer
+var groq_controls: VBoxContainer
+
+# Ollama-specific controls
 var ollama_url_field: LineEdit
 var ollama_streaming_check: CheckBox
 var ollama_temperature_slider: HSlider
 var ollama_pull_button: Button
 var ollama_quick_actions: Array = []
+
+# OpenAI-specific controls
+var openai_api_key_field: LineEdit
+var openai_org_field: LineEdit
+var openai_temperature_slider: HSlider
+var openai_max_tokens_field: SpinBox
+
+# Gemini-specific controls
+var gemini_api_key_field: LineEdit
+var gemini_safety_settings: OptionButton
+var gemini_temperature_slider: HSlider
+
+# Anthropic-specific controls
+var anthropic_api_key_field: LineEdit
+var anthropic_max_tokens_field: SpinBox
+var anthropic_temperature_slider: HSlider
+
+# Groq-specific controls
+var groq_api_key_field: LineEdit
+var groq_temperature_slider: HSlider
 var editor_context_menu: PopupMenu
 var code_output: TextEdit
 var apply_button: Button
@@ -266,6 +294,42 @@ func _create_modern_header(parent: Container):
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header_content.add_child(spacer)
 
+	# Provider quick switch buttons
+	var quick_switch_container = HBoxContainer.new()
+	quick_switch_container.add_theme_constant_override("separation", 2)
+
+	# Ollama quick switch
+	var ollama_button = Button.new()
+	ollama_button.text = "🦙"
+	ollama_button.tooltip_text = "Switch to Ollama"
+	ollama_button.custom_minimum_size = Vector2(24, 24)
+	ollama_button.flat = true
+	ollama_button.add_theme_font_size_override("font_size", 12)
+	ollama_button.pressed.connect(func(): _quick_switch_provider("ollama"))
+	quick_switch_container.add_child(ollama_button)
+
+	# OpenAI quick switch
+	var openai_button = Button.new()
+	openai_button.text = "🧠"
+	openai_button.tooltip_text = "Switch to OpenAI"
+	openai_button.custom_minimum_size = Vector2(24, 24)
+	openai_button.flat = true
+	openai_button.add_theme_font_size_override("font_size", 12)
+	openai_button.pressed.connect(func(): _quick_switch_provider("openai"))
+	quick_switch_container.add_child(openai_button)
+
+	# Gemini quick switch
+	var gemini_button = Button.new()
+	gemini_button.text = "🤖"
+	gemini_button.tooltip_text = "Switch to Gemini"
+	gemini_button.custom_minimum_size = Vector2(24, 24)
+	gemini_button.flat = true
+	gemini_button.add_theme_font_size_override("font_size", 12)
+	gemini_button.pressed.connect(func(): _quick_switch_provider("gemini"))
+	quick_switch_container.add_child(gemini_button)
+
+	header_content.add_child(quick_switch_container)
+
 	# Model info label
 	model_info_label = Label.new()
 	model_info_label.text = "No Model"
@@ -286,6 +350,15 @@ func _create_modern_header(parent: Container):
 	header_container.add_child(status_panel)
 
 	parent.add_child(header_container)
+
+func _quick_switch_provider(provider_name: String):
+	"""Quick switch to a specific provider"""
+	var providers = ["gemini", "huggingface", "cohere", "openai", "anthropic", "groq", "ollama"]
+	var index = providers.find(provider_name)
+	if index >= 0 and provider_option:
+		provider_option.selected = index
+		_on_provider_changed(index)
+		print("Quick switched to provider: ", provider_name)
 
 	# Add progress bar for AI operations
 	progress_bar = ProgressBar.new()
@@ -484,8 +557,17 @@ func _create_settings_section(parent: Container):
 	# Initialize model dropdown
 	_update_model_dropdown()
 
-	# Ollama-specific controls (initially hidden)
+	# Create provider-specific settings container
+	provider_specific_container = VBoxContainer.new()
+	provider_specific_container.add_theme_constant_override("separation", 8)
+	settings_content.add_child(provider_specific_container)
+
+	# Create all provider-specific controls
 	_create_ollama_controls()
+	_create_openai_controls()
+	_create_gemini_controls()
+	_create_anthropic_controls()
+	_create_groq_controls()
 
 	settings_content_container.add_child(settings_content)
 	settings_panel.add_child(settings_content_container)
@@ -1287,17 +1369,88 @@ func _on_provider_changed(index: int):
 	var providers = ["gemini", "huggingface", "cohere", "openai", "anthropic", "groq", "ollama"]
 	if index < providers.size():
 		var provider = providers[index]
+		print("Switching to provider: ", provider)
+
+		# Set provider in API manager
 		if api_manager and api_manager.has_method("set_provider"):
 			api_manager.set_provider(provider)
+
+		# Update UI elements
 		_update_provider_info(provider)
 		_update_model_dropdown()
+		_show_provider_specific_settings(provider)
+		_update_provider_status(provider)
 
-		# Update status based on provider
-		if provider == "ollama":
-			_update_connection_status(true)  # Will be updated by actual status check
+		# Save provider preference
+		_save_provider_preference(provider)
+
+func _show_provider_specific_settings(provider: String):
+	"""Show/hide provider-specific settings based on selected provider"""
+	if not provider_specific_container:
+		return
+
+	# Hide all provider-specific controls
+	if ollama_controls:
+		ollama_controls.visible = false
+	if openai_controls:
+		openai_controls.visible = false
+	if gemini_controls:
+		gemini_controls.visible = false
+	if anthropic_controls:
+		anthropic_controls.visible = false
+	if groq_controls:
+		groq_controls.visible = false
+
+	# Show relevant provider controls
+	match provider:
+		"ollama":
+			if ollama_controls:
+				ollama_controls.visible = true
+				_check_ollama_status()
+		"openai":
+			if openai_controls:
+				openai_controls.visible = true
+		"gemini":
+			if gemini_controls:
+				gemini_controls.visible = true
+		"anthropic":
+			if anthropic_controls:
+				anthropic_controls.visible = true
+		"groq":
+			if groq_controls:
+				groq_controls.visible = true
+
+func _update_provider_status(provider: String):
+	"""Update status indicators based on provider"""
+	match provider:
+		"ollama":
 			_update_ai_status("Connecting to Ollama...", Color.YELLOW)
-		else:
+			_update_connection_status(false)  # Will be updated by status check
+		"openai":
+			var has_key = openai_api_key_field and not openai_api_key_field.text.is_empty()
+			_update_ai_status("OpenAI " + ("Ready" if has_key else "API Key Required"), Color.GREEN if has_key else Color.YELLOW)
+			_update_connection_status(has_key)
+		"gemini":
+			var has_key = gemini_api_key_field and not gemini_api_key_field.text.is_empty()
+			_update_ai_status("Gemini " + ("Ready" if has_key else "API Key Required"), Color.GREEN if has_key else Color.YELLOW)
+			_update_connection_status(has_key)
+		"anthropic":
+			var has_key = anthropic_api_key_field and not anthropic_api_key_field.text.is_empty()
+			_update_ai_status("Anthropic " + ("Ready" if has_key else "API Key Required"), Color.GREEN if has_key else Color.YELLOW)
+			_update_connection_status(has_key)
+		"groq":
+			var has_key = groq_api_key_field and not groq_api_key_field.text.is_empty()
+			_update_ai_status("Groq " + ("Ready" if has_key else "API Key Required"), Color.GREEN if has_key else Color.YELLOW)
+			_update_connection_status(has_key)
+		_:
 			_update_ai_status("Ready", Color.GREEN)
+			_update_connection_status(true)
+
+func _save_provider_preference(provider: String):
+	"""Save provider preference to settings"""
+	var settings = _load_settings_data()
+	settings["provider"] = provider
+	_save_settings(settings)
 
 func _update_provider_info(provider: String):
 	"""Update UI based on selected provider"""
@@ -1554,8 +1707,338 @@ func _create_ollama_controls():
 	mgmt_section.add_child(model_mgmt_grid)
 	ollama_controls.add_child(mgmt_section)
 
-	# Add to settings content
-	settings_content.add_child(ollama_controls)
+	# Add to provider-specific container
+	provider_specific_container.add_child(ollama_controls)
+
+func _create_openai_controls():
+	"""Create OpenAI-specific controls"""
+	openai_controls = VBoxContainer.new()
+	openai_controls.visible = false
+	openai_controls.add_theme_constant_override("separation", 8)
+
+	# OpenAI configuration section
+	var openai_section = VBoxContainer.new()
+	var openai_title = Label.new()
+	openai_title.text = "🧠 OpenAI Configuration"
+	openai_title.add_theme_font_size_override("font_size", 12)
+	openai_title.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
+	openai_section.add_child(openai_title)
+
+	# API Key
+	var api_key_label = Label.new()
+	api_key_label.text = "API Key:"
+	api_key_label.add_theme_font_size_override("font_size", 10)
+	api_key_label.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9))
+	openai_section.add_child(api_key_label)
+
+	openai_api_key_field = LineEdit.new()
+	openai_api_key_field.placeholder_text = "🔑 Enter OpenAI API key"
+	openai_api_key_field.secret = true
+	openai_api_key_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	openai_api_key_field.custom_minimum_size = Vector2(0, 28)
+	openai_api_key_field.text_changed.connect(_on_openai_api_key_changed)
+	_style_input_field(openai_api_key_field, Color(0.2, 0.6, 1.0, 0.5))
+	openai_section.add_child(openai_api_key_field)
+
+	# Organization ID (optional)
+	var org_label = Label.new()
+	org_label.text = "Organization ID (Optional):"
+	org_label.add_theme_font_size_override("font_size", 10)
+	org_label.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9))
+	openai_section.add_child(org_label)
+
+	openai_org_field = LineEdit.new()
+	openai_org_field.placeholder_text = "🏢 Organization ID"
+	openai_org_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	openai_org_field.custom_minimum_size = Vector2(0, 28)
+	openai_org_field.text_changed.connect(_on_openai_org_changed)
+	_style_input_field(openai_org_field, Color(0.6, 0.4, 1.0, 0.5))
+	openai_section.add_child(openai_org_field)
+
+	openai_controls.add_child(openai_section)
+
+	# Advanced settings
+	var advanced_section = VBoxContainer.new()
+	var advanced_title = Label.new()
+	advanced_title.text = "⚙️ Advanced Settings"
+	advanced_title.add_theme_font_size_override("font_size", 12)
+	advanced_title.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
+	advanced_section.add_child(advanced_title)
+
+	# Temperature control
+	var temp_container = VBoxContainer.new()
+	var temp_header = HBoxContainer.new()
+	var temp_label = Label.new()
+	temp_label.text = "🌡️ Temperature:"
+	temp_label.add_theme_font_size_override("font_size", 10)
+	temp_label.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9))
+	temp_header.add_child(temp_label)
+
+	var temp_value_label = Label.new()
+	temp_value_label.text = "0.7"
+	temp_value_label.add_theme_font_size_override("font_size", 10)
+	temp_value_label.add_theme_color_override("font_color", Color(1.0, 0.8, 0.4))
+	temp_value_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	temp_value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	temp_header.add_child(temp_value_label)
+	temp_container.add_child(temp_header)
+
+	openai_temperature_slider = HSlider.new()
+	openai_temperature_slider.min_value = 0.0
+	openai_temperature_slider.max_value = 2.0
+	openai_temperature_slider.step = 0.1
+	openai_temperature_slider.value = 0.7
+	openai_temperature_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	openai_temperature_slider.custom_minimum_size = Vector2(0, 20)
+	openai_temperature_slider.value_changed.connect(_on_openai_temperature_changed)
+	openai_temperature_slider.value_changed.connect(func(value): temp_value_label.text = "%.1f" % value)
+	temp_container.add_child(openai_temperature_slider)
+	advanced_section.add_child(temp_container)
+
+	# Max tokens
+	var tokens_container = HBoxContainer.new()
+	var tokens_label = Label.new()
+	tokens_label.text = "📝 Max Tokens:"
+	tokens_label.add_theme_font_size_override("font_size", 10)
+	tokens_label.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9))
+	tokens_label.custom_minimum_size = Vector2(80, 0)
+	tokens_container.add_child(tokens_label)
+
+	openai_max_tokens_field = SpinBox.new()
+	openai_max_tokens_field.min_value = 1
+	openai_max_tokens_field.max_value = 4096
+	openai_max_tokens_field.value = 1000
+	openai_max_tokens_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	openai_max_tokens_field.value_changed.connect(_on_openai_max_tokens_changed)
+	tokens_container.add_child(openai_max_tokens_field)
+	advanced_section.add_child(tokens_container)
+
+	openai_controls.add_child(advanced_section)
+	provider_specific_container.add_child(openai_controls)
+
+func _style_input_field(field: LineEdit, border_color: Color):
+	"""Apply consistent styling to input fields"""
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.08, 0.1, 0.15, 0.9)
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_left = 4
+	style.corner_radius_bottom_right = 4
+	style.border_width_left = 1
+	style.border_width_right = 1
+	style.border_width_top = 1
+	style.border_width_bottom = 1
+	style.border_color = border_color
+	field.add_theme_stylebox_override("normal", style)
+	field.add_theme_stylebox_override("focus", style)
+
+func _create_gemini_controls():
+	"""Create Gemini-specific controls"""
+	gemini_controls = VBoxContainer.new()
+	gemini_controls.visible = false
+	gemini_controls.add_theme_constant_override("separation", 8)
+
+	# Gemini configuration section
+	var gemini_section = VBoxContainer.new()
+	var gemini_title = Label.new()
+	gemini_title.text = "🤖 Gemini Configuration"
+	gemini_title.add_theme_font_size_override("font_size", 12)
+	gemini_title.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
+	gemini_section.add_child(gemini_title)
+
+	# API Key
+	var api_key_label = Label.new()
+	api_key_label.text = "API Key:"
+	api_key_label.add_theme_font_size_override("font_size", 10)
+	api_key_label.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9))
+	gemini_section.add_child(api_key_label)
+
+	gemini_api_key_field = LineEdit.new()
+	gemini_api_key_field.placeholder_text = "🔑 Enter Gemini API key (Free tier available)"
+	gemini_api_key_field.secret = true
+	gemini_api_key_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gemini_api_key_field.custom_minimum_size = Vector2(0, 28)
+	gemini_api_key_field.text_changed.connect(_on_gemini_api_key_changed)
+	_style_input_field(gemini_api_key_field, Color(0.4, 0.8, 0.4, 0.5))
+	gemini_section.add_child(gemini_api_key_field)
+
+	gemini_controls.add_child(gemini_section)
+
+	# Advanced settings
+	var advanced_section = VBoxContainer.new()
+	var advanced_title = Label.new()
+	advanced_title.text = "⚙️ Advanced Settings"
+	advanced_title.add_theme_font_size_override("font_size", 12)
+	advanced_title.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
+	advanced_section.add_child(advanced_title)
+
+	# Safety settings
+	var safety_container = VBoxContainer.new()
+	var safety_label = Label.new()
+	safety_label.text = "🛡️ Safety Settings:"
+	safety_label.add_theme_font_size_override("font_size", 10)
+	safety_label.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9))
+	safety_container.add_child(safety_label)
+
+	gemini_safety_settings = OptionButton.new()
+	gemini_safety_settings.add_item("🔒 High Safety (Default)")
+	gemini_safety_settings.add_item("⚖️ Medium Safety")
+	gemini_safety_settings.add_item("⚠️ Low Safety")
+	gemini_safety_settings.selected = 0
+	gemini_safety_settings.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gemini_safety_settings.custom_minimum_size = Vector2(0, 28)
+	gemini_safety_settings.item_selected.connect(_on_gemini_safety_changed)
+	safety_container.add_child(gemini_safety_settings)
+	advanced_section.add_child(safety_container)
+
+	# Temperature control
+	var temp_container = VBoxContainer.new()
+	var temp_header = HBoxContainer.new()
+	var temp_label = Label.new()
+	temp_label.text = "🌡️ Temperature:"
+	temp_label.add_theme_font_size_override("font_size", 10)
+	temp_label.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9))
+	temp_header.add_child(temp_label)
+
+	var temp_value_label = Label.new()
+	temp_value_label.text = "0.7"
+	temp_value_label.add_theme_font_size_override("font_size", 10)
+	temp_value_label.add_theme_color_override("font_color", Color(1.0, 0.8, 0.4))
+	temp_value_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	temp_value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	temp_header.add_child(temp_value_label)
+	temp_container.add_child(temp_header)
+
+	gemini_temperature_slider = HSlider.new()
+	gemini_temperature_slider.min_value = 0.0
+	gemini_temperature_slider.max_value = 1.0
+	gemini_temperature_slider.step = 0.1
+	gemini_temperature_slider.value = 0.7
+	gemini_temperature_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gemini_temperature_slider.custom_minimum_size = Vector2(0, 20)
+	gemini_temperature_slider.value_changed.connect(_on_gemini_temperature_changed)
+	gemini_temperature_slider.value_changed.connect(func(value): temp_value_label.text = "%.1f" % value)
+	temp_container.add_child(gemini_temperature_slider)
+	advanced_section.add_child(temp_container)
+
+	gemini_controls.add_child(advanced_section)
+	provider_specific_container.add_child(gemini_controls)
+
+func _create_anthropic_controls():
+	"""Create Anthropic-specific controls"""
+	anthropic_controls = VBoxContainer.new()
+	anthropic_controls.visible = false
+	anthropic_controls.add_theme_constant_override("separation", 8)
+
+	# Anthropic configuration section
+	var anthropic_section = VBoxContainer.new()
+	var anthropic_title = Label.new()
+	anthropic_title.text = "🎭 Anthropic Configuration"
+	anthropic_title.add_theme_font_size_override("font_size", 12)
+	anthropic_title.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
+	anthropic_section.add_child(anthropic_title)
+
+	# API Key
+	var api_key_label = Label.new()
+	api_key_label.text = "API Key:"
+	api_key_label.add_theme_font_size_override("font_size", 10)
+	api_key_label.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9))
+	anthropic_section.add_child(api_key_label)
+
+	anthropic_api_key_field = LineEdit.new()
+	anthropic_api_key_field.placeholder_text = "🔑 Enter Anthropic API key"
+	anthropic_api_key_field.secret = true
+	anthropic_api_key_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	anthropic_api_key_field.custom_minimum_size = Vector2(0, 28)
+	anthropic_api_key_field.text_changed.connect(_on_anthropic_api_key_changed)
+	_style_input_field(anthropic_api_key_field, Color(0.8, 0.4, 0.8, 0.5))
+	anthropic_section.add_child(anthropic_api_key_field)
+
+	anthropic_controls.add_child(anthropic_section)
+	provider_specific_container.add_child(anthropic_controls)
+
+func _create_groq_controls():
+	"""Create Groq-specific controls"""
+	groq_controls = VBoxContainer.new()
+	groq_controls.visible = false
+	groq_controls.add_theme_constant_override("separation", 8)
+
+	# Groq configuration section
+	var groq_section = VBoxContainer.new()
+	var groq_title = Label.new()
+	groq_title.text = "⚡ Groq Configuration"
+	groq_title.add_theme_font_size_override("font_size", 12)
+	groq_title.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
+	groq_section.add_child(groq_title)
+
+	# API Key
+	var api_key_label = Label.new()
+	api_key_label.text = "API Key:"
+	api_key_label.add_theme_font_size_override("font_size", 10)
+	api_key_label.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9))
+	groq_section.add_child(api_key_label)
+
+	groq_api_key_field = LineEdit.new()
+	groq_api_key_field.placeholder_text = "🔑 Enter Groq API key (Free tier available)"
+	groq_api_key_field.secret = true
+	groq_api_key_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	groq_api_key_field.custom_minimum_size = Vector2(0, 28)
+	groq_api_key_field.text_changed.connect(_on_groq_api_key_changed)
+	_style_input_field(groq_api_key_field, Color(1.0, 0.6, 0.2, 0.5))
+	groq_section.add_child(groq_api_key_field)
+
+	groq_controls.add_child(groq_section)
+	provider_specific_container.add_child(groq_controls)
+
+# Provider-specific event handlers
+func _on_openai_api_key_changed(new_key: String):
+	"""Handle OpenAI API key change"""
+	if api_manager:
+		api_manager.set_api_key(new_key)
+	_update_provider_status("openai")
+
+func _on_openai_org_changed(new_org: String):
+	"""Handle OpenAI organization change"""
+	# Store organization ID for OpenAI requests
+	pass
+
+func _on_openai_temperature_changed(value: float):
+	"""Handle OpenAI temperature change"""
+	if api_manager:
+		api_manager.set_temperature(value)
+
+func _on_openai_max_tokens_changed(value: float):
+	"""Handle OpenAI max tokens change"""
+	if api_manager:
+		api_manager.set_max_tokens(int(value))
+
+func _on_gemini_api_key_changed(new_key: String):
+	"""Handle Gemini API key change"""
+	if api_manager:
+		api_manager.set_api_key(new_key)
+	_update_provider_status("gemini")
+
+func _on_gemini_safety_changed(index: int):
+	"""Handle Gemini safety settings change"""
+	# Store safety settings for Gemini requests
+	pass
+
+func _on_gemini_temperature_changed(value: float):
+	"""Handle Gemini temperature change"""
+	if api_manager:
+		api_manager.set_temperature(value)
+
+func _on_anthropic_api_key_changed(new_key: String):
+	"""Handle Anthropic API key change"""
+	if api_manager:
+		api_manager.set_api_key(new_key)
+	_update_provider_status("anthropic")
+
+func _on_groq_api_key_changed(new_key: String):
+	"""Handle Groq API key change"""
+	if api_manager:
+		api_manager.set_api_key(new_key)
+	_update_provider_status("groq")
 
 func _on_ollama_url_changed(new_url: String):
 	"""Handle Ollama URL change"""
@@ -2689,6 +3172,9 @@ func _save_settings(settings: Dictionary):
 	for key in settings:
 		config.set_value("ai_assistant", key, settings[key])
 
+	# Save provider-specific API keys securely
+	_save_provider_api_keys(config)
+
 	# Save UI state
 	config.set_value("ui_state", "settings_collapsed", settings_collapsed)
 	config.set_value("ui_state", "quick_actions_collapsed", quick_actions_collapsed)
@@ -2699,15 +3185,31 @@ func _save_settings(settings: Dictionary):
 
 	config.save("user://ai_assistant_settings.cfg")
 
+func _save_provider_api_keys(config: ConfigFile):
+	"""Save API keys for all providers"""
+	if openai_api_key_field and not openai_api_key_field.text.is_empty():
+		config.set_value("api_keys", "openai", openai_api_key_field.text)
+	if gemini_api_key_field and not gemini_api_key_field.text.is_empty():
+		config.set_value("api_keys", "gemini", gemini_api_key_field.text)
+	if anthropic_api_key_field and not anthropic_api_key_field.text.is_empty():
+		config.set_value("api_keys", "anthropic", anthropic_api_key_field.text)
+	if groq_api_key_field and not groq_api_key_field.text.is_empty():
+		config.set_value("api_keys", "groq", groq_api_key_field.text)
+	if ollama_url_field and not ollama_url_field.text.is_empty():
+		config.set_value("api_keys", "ollama_url", ollama_url_field.text)
+
 func _load_settings():
 	var config = ConfigFile.new()
 	var err = config.load("user://ai_assistant_settings.cfg")
 	if err == OK:
 		var api_key = config.get_value("ai_assistant", "api_key", "")
-		var provider = config.get_value("ai_assistant", "provider", "gemini")
+		var provider = config.get_value("ai_assistant", "provider", "ollama")  # Default to Ollama
 
 		api_manager.set_api_key(api_key)
 		api_manager.set_provider(provider)
+
+		# Load provider-specific API keys
+		_load_provider_api_keys(config)
 
 		# Load UI state
 		settings_collapsed = config.get_value("ui_state", "settings_collapsed", false)
@@ -2726,6 +3228,19 @@ func _load_settings():
 
 		# Apply UI state after a frame to ensure UI is ready
 		call_deferred("_apply_ui_state", splitter_offset)
+
+func _load_provider_api_keys(config: ConfigFile):
+	"""Load API keys for all providers"""
+	if openai_api_key_field:
+		openai_api_key_field.text = config.get_value("api_keys", "openai", "")
+	if gemini_api_key_field:
+		gemini_api_key_field.text = config.get_value("api_keys", "gemini", "")
+	if anthropic_api_key_field:
+		anthropic_api_key_field.text = config.get_value("api_keys", "anthropic", "")
+	if groq_api_key_field:
+		groq_api_key_field.text = config.get_value("api_keys", "groq", "")
+	if ollama_url_field:
+		ollama_url_field.text = config.get_value("api_keys", "ollama_url", "http://localhost:11434")
 
 func _apply_ui_state(splitter_offset: int):
 	if main_splitter:

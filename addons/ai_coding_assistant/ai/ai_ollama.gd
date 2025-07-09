@@ -551,12 +551,17 @@ func _on_stream_completed(result: int, response_code: int, headers: PackedString
 	print("Ollama stream completed - Result: ", result, " Response code: ", response_code)
 
 	if response_code != 200:
+		print("Stream failed with response code: ", response_code)
 		error_occurred.emit("Ollama stream failed with code: " + str(response_code), "")
 		return
 
 	var response_text = body.get_string_from_utf8()
+	print("Stream response text length: ", response_text.length())
+	print("Stream response preview: ", response_text.substr(0, 200))
+
 	var lines = response_text.split("\n")
 	var full_response = ""
+	var chunks_processed = 0
 
 	for line in lines:
 		if line.strip_edges().is_empty():
@@ -565,24 +570,44 @@ func _on_stream_completed(result: int, response_code: int, headers: PackedString
 		var json = JSON.new()
 		var parse_result = json.parse(line)
 		if parse_result != OK:
+			print("Failed to parse JSON line: ", line)
 			continue
 
 		var chunk_data = json.data
+		chunks_processed += 1
+
 		if "message" in chunk_data:
 			var content = chunk_data["message"].get("content", "")
 			if not content.is_empty():
 				full_response += content
 				stream_chunk_received.emit(content)
+				print("Stream chunk received: ", content)
 
 		# Check if stream is done
 		if chunk_data.get("done", false):
+			print("Stream marked as done. Full response length: ", full_response.length())
 			if not full_response.is_empty():
 				conversation_history.append({
 					"role": "assistant",
 					"content": full_response
 				})
 				response_received.emit(full_response, "")
+				print("Response emitted successfully")
+			else:
+				print("Warning: Stream completed but no content received")
+				error_occurred.emit("No response content received from Ollama", "")
 			break
+
+	print("Total chunks processed: ", chunks_processed)
+
+	# If no "done" signal was found, emit the response anyway
+	if chunks_processed > 0 and full_response.length() > 0:
+		print("No 'done' signal found, emitting response anyway")
+		conversation_history.append({
+			"role": "assistant",
+			"content": full_response
+		})
+		response_received.emit(full_response, "")
 
 func _on_model_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
 	"""Handle model management responses"""
