@@ -141,6 +141,9 @@ func _ready():
 	agent_memory = null
 	auto_error_fixer = null
 
+	# Set default provider to Ollama after UI is ready
+	call_deferred("_set_default_provider")
+
 func set_agent_components(brain: AgentBrain, terminal: TerminalIntegration, tasks: TaskManager, memory: AgentMemory, fixer: AutoErrorFixer):
 	"""Set and connect AI agent components"""
 	agent_brain = brain
@@ -165,6 +168,31 @@ func set_agent_components(brain: AgentBrain, terminal: TerminalIntegration, task
 		auto_error_fixer.error_fix_completed.connect(_on_error_fix_completed)
 
 	print("AI Agent components connected to dock")
+
+
+
+func _initialize_provider_settings():
+	"""Initialize provider settings and show appropriate panels"""
+	# Force set to Ollama first
+	if provider_option:
+		var providers = ["gemini", "huggingface", "cohere", "openai", "anthropic", "groq", "ollama"]
+		var ollama_index = providers.find("ollama")
+		if ollama_index >= 0:
+			provider_option.selected = ollama_index
+
+	# Load saved settings (but keep Ollama as default)
+	_load_settings()
+
+	# Ensure Ollama is selected
+	if api_manager:
+		api_manager.set_provider("ollama")
+
+	# Show Ollama controls by default
+	if provider_specific_container and ollama_controls:
+		_show_provider_specific_settings("ollama")
+
+	# Update status
+	_update_provider_status("ollama")
 
 	# Preload utility classes for better performance
 	# Note: These are used in template generation functions
@@ -225,6 +253,9 @@ func _setup_ui():
 
 	# Create quick actions section (collapsible)
 	_create_quick_actions_section(main_container)
+
+	# Initialize provider settings after UI is created
+	call_deferred("_initialize_provider_settings")
 
 func _create_modern_header(parent: Container):
 	"""Create a modern, professional header with AI status and controls"""
@@ -351,15 +382,6 @@ func _create_modern_header(parent: Container):
 
 	parent.add_child(header_container)
 
-func _quick_switch_provider(provider_name: String):
-	"""Quick switch to a specific provider"""
-	var providers = ["gemini", "huggingface", "cohere", "openai", "anthropic", "groq", "ollama"]
-	var index = providers.find(provider_name)
-	if index >= 0 and provider_option:
-		provider_option.selected = index
-		_on_provider_changed(index)
-		print("Quick switched to provider: ", provider_name)
-
 	# Add progress bar for AI operations
 	progress_bar = ProgressBar.new()
 	progress_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -368,8 +390,14 @@ func _quick_switch_provider(provider_name: String):
 	progress_bar.modulate = Color(0.3, 0.6, 1.0)
 	parent.add_child(progress_bar)
 
-	# Apply responsive design after UI is created
-	call_deferred("_apply_responsive_design")
+func _quick_switch_provider(provider_name: String):
+	"""Quick switch to a specific provider"""
+	var providers = ["gemini", "huggingface", "cohere", "openai", "anthropic", "groq", "ollama"]
+	var index = providers.find(provider_name)
+	if index >= 0 and provider_option:
+		provider_option.selected = index
+		_on_provider_changed(index)
+		print("Quick switched to provider: ", provider_name)
 
 func _on_settings_toggle():
 	"""Toggle settings panel visibility"""
@@ -1451,6 +1479,18 @@ func _save_provider_preference(provider: String):
 	var settings = _load_settings_data()
 	settings["provider"] = provider
 	_save_settings(settings)
+
+func _load_settings_data() -> Dictionary:
+	"""Load settings data from config file"""
+	var config = ConfigFile.new()
+	var settings = {}
+	var err = config.load("user://ai_assistant_settings.cfg")
+	if err == OK:
+		# Load all settings from ai_assistant section
+		var keys = config.get_section_keys("ai_assistant")
+		for key in keys:
+			settings[key] = config.get_value("ai_assistant", key)
+	return settings
 
 func _update_provider_info(provider: String):
 	"""Update UI based on selected provider"""
